@@ -1456,66 +1456,69 @@ Example: Employee submits a vacation request. Manager reviews the request. If ap
         }
         
         // Show PlantUML
-        function showPlantUML(plantumlText) {
-            document.getElementById('plantuml-text').textContent = plantumlText;
-            
-            try {
-                // CORRECT PlantUML encoding
-                const encoded = encodePlantUMLCorrect(plantumlText);
-                const url = "https://www.plantuml.com/plantuml/svg/" + encoded;
+        <script>
+function showPlantUML(plantumlText) {
+    document.getElementById('plantuml-text').textContent = plantumlText;
 
-                
-                // Create image container
-                const imgContainer = document.getElementById('plantuml-image');
-                imgContainer.innerHTML = `
-                    <div class="plantuml-image-container">
-                        <img src="${url}" 
-                             alt="UML Diagram" 
-                             onload="console.log('PlantUML loaded successfully')"
-                             onerror="this.onerror=null; this.style.display='none'; this.parentElement.innerHTML='<div style=\'text-align:center; padding:20px;\'><div style=\'font-size:30px; margin-bottom:10px; color:#667eea;\'>⚠️</div><h3 style=\'color:#667eea; margin-bottom:10px; font-size:16px;\'>Diagram Preview Unavailable</h3><p style=\'color:#666; margin-bottom:15px; font-size:14px; max-width:350px; margin:0 auto 15px;\'>You can view the diagram directly via the link below:</p><a href=\'${url}\' target=\'_blank\' style=\'display:inline-block; padding:10px 20px; background:linear-gradient(135deg, #667eea 0%, #764ba2 100%); color:white; text-decoration:none; border-radius:10px; font-size:14px; font-weight:bold; box-shadow:0 5px 15px rgba(102,126,234,0.5);\'><i class=\'fas fa-external-link-alt\'></i> Open PlantUML in New Tab</a></div>'">
-                    </div>`;
-                
-                // Show URL link
-                const urlLink = document.getElementById('plantuml-url');
-                urlLink.href = url;
-                urlLink.innerHTML = '<i class="fas fa-external-link-alt"></i> Open PlantUML diagram in new tab';
-                urlLink.style.display = 'block';
-                
-                document.getElementById('result-plantuml').style.display = 'block';
-                
-                // Scroll to diagram
-                setTimeout(() => {
-                    imgContainer.scrollIntoView({ 
-                        behavior: 'smooth',
-                        block: 'center'
-                    });
-                }, 100);
-                
-            } catch (error) {
-                console.error("PlantUML generation error:", error);
-                const imgContainer = document.getElementById('plantuml-image');
-                imgContainer.innerHTML = `<div class="plantuml-image-container">
-                    <div style="text-align:center; padding:15px; color:#ff416c">
-                        <div style="font-size: 30px; margin-bottom: 10px;">❌</div>
-                        <h3 style="font-size: 16px;">Error generating diagram</h3>
-                        <p style="font-size: 14px; max-width: 350px; margin: 10px auto;">Try copying the PlantUML code above to <a href="https://plantuml.com/" target="_blank" style="color:#667eea; font-weight:bold;">plantuml.com</a></p>
-                    </div>
-                </div>`;
-                document.getElementById('result-plantuml').style.display = 'block';
-            }
-        }
-        
-        // CORRECT PlantUML encoding function
-function encodePlantUMLCorrect(s) {
-    // UTF-8 encoding
-    let data = unescape(encodeURIComponent(s));
-    let bytes = [];
-    for (let i = 0; i < data.length; i++) bytes.push(data.charCodeAt(i));
+    try {
+        // Generate proper PlantUML link
+        const encoded = encodePlantUMLCorrect(plantumlText);
+        const url = `https://www.plantuml.com/plantuml/svg/${encoded}`;
 
-    // Deflate raw
-    let deflated = pako.deflateRaw(bytes);
+        const imgContainer = document.getElementById('plantuml-image');
+        imgContainer.innerHTML = `
+            <div class="plantuml-image-container">
+                <img src="${url}" 
+                     alt="UML Diagram"
+                     onload="console.log('PlantUML loaded OK')"
+                     onerror="this.onerror=null;
+                        this.style.display='none';
+                        this.parentElement.innerHTML=
+                        '<div style=\'text-align:center; padding:20px;\'>
+                            <div style=\'font-size:30px; color:#667eea;\'>⚠️</div>
+                            <h3 style=\'color:#667eea; font-size:16px; margin-bottom:10px;\'>
+                                Diagram cannot be displayed
+                            </h3>
+                            <a href=\'${url}\' target=\'_blank\'
+                               style=\'padding:10px 20px;
+                                      display:inline-block;
+                                      background:#667eea;
+                                      color:white;
+                                      border-radius:10px;\'>
+                               Open PlantUML
+                            </a>
+                        </div>';">
+            </div>
+        `;
 
-    // PlantUML 6-bit encoding
+        // Update external link
+        const urlLink = document.getElementById("plantuml-url");
+        urlLink.href = url;
+        urlLink.style.display = "block";
+
+        document.getElementById('result-plantuml').style.display = 'block';
+
+    } catch (err) {
+        console.error("PlantUML error:", err);
+        document.getElementById('plantuml-image').innerHTML =
+            `<div style="color:#ff416c; padding:20px;">❌ Error generating diagram</div>`;
+    }
+}
+</script>
+
+<script>
+// -------------------------------------------------------------------
+// CORRECT PlantUML Encoding (DEFLATE + 6bit PlantUML encoding)
+// Fully compatible with https://plantuml.com/text-encoding
+// -------------------------------------------------------------------
+function encodePlantUMLCorrect(text) {
+    // convert UTF-8 string → byte array
+    const utf8 = new TextEncoder().encode(text);
+
+    // raw DEFLATE (NO zlib header!)
+    const compressed = pako.deflateRaw(utf8, { level: 9 });
+
+    // 6-bit encoding table
     function encode6bit(b) {
         if (b < 10) return String.fromCharCode(48 + b);
         b -= 10;
@@ -1526,11 +1529,12 @@ function encodePlantUMLCorrect(s) {
         return b === 0 ? '-' : '_';
     }
 
+    // group 3 bytes → 4 encoded characters
     function append3bytes(b1, b2, b3) {
-        let c1 = b1 >> 2;
-        let c2 = ((b1 & 0x3) << 4) | (b2 >> 4);
-        let c3 = ((b2 & 0xF) << 2) | (b3 >> 6);
-        let c4 = b3 & 0x3F;
+        const c1 = b1 >> 2;
+        const c2 = ((b1 & 0x3) << 4) | (b2 >> 4);
+        const c3 = ((b2 & 0xF) << 2) | (b3 >> 6);
+        const c4 = b3 & 0x3F;
         return (
             encode6bit(c1) +
             encode6bit(c2) +
@@ -1539,16 +1543,16 @@ function encodePlantUMLCorrect(s) {
         );
     }
 
-    let res = "";
-    for (let i = 0; i < deflated.length; i += 3) {
-        let b1 = deflated[i];
-        let b2 = i + 1 < deflated.length ? deflated[i + 1] : 0;
-        let b3 = i + 2 < deflated.length ? deflated[i + 2] : 0;
-        res += append3bytes(b1, b2, b3);
+    let result = "";
+    for (let i = 0; i < compressed.length; i += 3) {
+        const b1 = compressed[i];
+        const b2 = i + 1 < compressed.length ? compressed[i + 1] : 0;
+        const b3 = i + 2 < compressed.length ? compressed[i + 2] : 0;
+        result += append3bytes(b1, b2, b3);
     }
-
-    return res;
+    return result;
 }
+</script>
 
         
         // Simple DEFLATE compression fallback
@@ -1845,3 +1849,4 @@ function encodePlantUMLCorrect(s) {
 </body>
 
 </html>
+
