@@ -15,186 +15,382 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             line-height: 1.6;
             color: #333;
-            background-color: #f5f7fa;
-            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 0;
         }
         
-        .container {
-            max-width: 1400px;
+        .background-wrapper {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            z-index: -1;
+        }
+        
+        .main-container {
+            max-width: 2000px;
             margin: 0 auto;
+            padding: 30px;
+            min-height: 100vh;
+        }
+        
+        .glass-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
         }
         
         h1 {
             text-align: center;
-            margin-bottom: 30px;
+            margin-bottom: 40px;
             color: #2c3e50;
-            padding-bottom: 10px;
-            border-bottom: 2px solid #3498db;
+            padding: 40px 0 20px;
+            font-size: 3.2rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
         
         .input-section {
-            background-color: white;
-            border-radius: 8px;
-            padding: 25px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-            margin-bottom: 30px;
+            padding: 50px;
+            margin-bottom: 50px;
+            border-bottom: 2px solid rgba(102, 126, 234, 0.1);
         }
         
         .input-section h2 {
-            margin-bottom: 15px;
+            margin-bottom: 30px;
             color: #2c3e50;
-            font-size: 1.4rem;
+            font-size: 2rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .input-section h2:before {
+            content: "📝";
+            font-size: 1.8rem;
         }
         
         .test-buttons {
-            display: flex;
-            gap: 15px;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+        
+        @media (max-width: 1200px) {
+            .test-buttons {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .test-buttons {
+                grid-template-columns: 1fr;
+            }
         }
         
         .test-btn {
-            padding: 10px 20px;
-            background-color: #3498db;
+            padding: 25px 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             border: none;
-            border-radius: 4px;
+            border-radius: 15px;
             cursor: pointer;
-            font-weight: 500;
-            transition: background-color 0.3s;
+            font-weight: 600;
+            font-size: 18px;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+        }
+        
+        .test-btn:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: 0.5s;
         }
         
         .test-btn:hover {
-            background-color: #2980b9;
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(102, 126, 234, 0.5);
+        }
+        
+        .test-btn:hover:before {
+            left: 100%;
         }
         
         textarea {
             width: 100%;
-            min-height: 180px;
-            padding: 15px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
+            min-height: 250px;
+            padding: 30px;
+            border: 3px solid rgba(102, 126, 234, 0.2);
+            border-radius: 15px;
             font-family: 'Consolas', 'Monaco', monospace;
-            font-size: 14px;
-            line-height: 1.5;
+            font-size: 18px;
+            line-height: 1.8;
             resize: vertical;
-            margin-bottom: 20px;
+            margin-bottom: 40px;
+            background: rgba(255, 255, 255, 0.9);
+            transition: all 0.3s;
+            box-shadow: inset 0 4px 15px rgba(0, 0, 0, 0.05);
+        }
+        
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 5px rgba(102, 126, 234, 0.1), inset 0 4px 15px rgba(0, 0, 0, 0.05);
+            background: white;
         }
         
         .main-buttons {
             display: flex;
             justify-content: center;
-            gap: 20px;
-            margin-top: 20px;
+            gap: 40px;
+            margin-top: 40px;
         }
         
         .process-btn {
-            padding: 12px 30px;
-            background-color: #2ecc71;
+            padding: 25px 60px;
+            background: linear-gradient(135deg, #00b09b 0%, #96c93d 100%);
             color: white;
             border: none;
-            border-radius: 4px;
+            border-radius: 15px;
             cursor: pointer;
-            font-size: 16px;
-            font-weight: 600;
-            transition: background-color 0.3s;
+            font-size: 22px;
+            font-weight: 700;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 15px 35px rgba(0, 176, 155, 0.3);
+            min-width: 250px;
+        }
+        
+        .process-btn:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+            transition: 0.5s;
         }
         
         .process-btn:hover {
-            background-color: #27ae60;
+            transform: translateY(-10px) scale(1.05);
+            box-shadow: 0 25px 50px rgba(0, 176, 155, 0.5);
+        }
+        
+        .process-btn:hover:before {
+            left: 100%;
         }
         
         .reset-btn {
-            padding: 12px 30px;
-            background-color: #e74c3c;
+            padding: 25px 60px;
+            background: linear-gradient(135deg, #ff416c 0%, #ff4b2b 100%);
             color: white;
             border: none;
-            border-radius: 4px;
+            border-radius: 15px;
             cursor: pointer;
-            font-size: 16px;
-            font-weight: 600;
-            transition: background-color 0.3s;
+            font-size: 22px;
+            font-weight: 700;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 15px 35px rgba(255, 65, 108, 0.3);
+            min-width: 250px;
+        }
+        
+        .reset-btn:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+            transition: 0.5s;
         }
         
         .reset-btn:hover {
-            background-color: #c0392b;
+            transform: translateY(-10px) scale(1.05);
+            box-shadow: 0 25px 50px rgba(255, 65, 108, 0.5);
+        }
+        
+        .reset-btn:hover:before {
+            left: 100%;
         }
         
         .progress-section {
-            margin-top: 20px;
+            margin-top: 40px;
             display: none;
         }
         
         .progress-bar-container {
             width: 100%;
-            height: 20px;
-            background-color: #ecf0f1;
-            border-radius: 10px;
+            height: 35px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 20px;
             overflow: hidden;
-            margin-bottom: 10px;
+            margin-bottom: 25px;
+            box-shadow: inset 0 4px 15px rgba(0, 0, 0, 0.1);
+            border: 2px solid rgba(102, 126, 234, 0.2);
         }
         
         .progress-bar {
             height: 100%;
-            background: linear-gradient(90deg, #3498db, #2ecc71);
+            background: linear-gradient(90deg, #667eea, #764ba2, #00b09b, #96c93d);
             width: 0%;
-            transition: width 0.5s ease;
-            border-radius: 10px;
+            transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            border-radius: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .progress-bar:after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            right: 0;
+            background: linear-gradient(
+                90deg,
+                transparent 0%,
+                rgba(255, 255, 255, 0.4) 50%,
+                transparent 100%
+            );
+            animation: shimmer 2s infinite;
+        }
+        
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
         }
         
         .progress-text {
             text-align: center;
-            font-size: 14px;
-            color: #7f8c8d;
+            font-size: 20px;
+            color: #2c3e50;
+            font-weight: 600;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 15px;
+            border: 2px solid rgba(102, 126, 234, 0.2);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
         }
         
         .error-section {
-            background-color: #fde8e8;
-            color: #e74c3c;
-            border: 1px solid #e74c3c;
-            border-radius: 4px;
-            padding: 15px;
-            margin-top: 20px;
+            background: linear-gradient(135deg, rgba(255, 65, 108, 0.1) 0%, rgba(255, 75, 43, 0.1) 100%);
+            color: #ff416c;
+            border: 3px solid #ff416c;
+            border-radius: 15px;
+            padding: 30px;
+            margin-top: 40px;
             display: none;
+            animation: pulse 2s infinite;
+            backdrop-filter: blur(10px);
+        }
+        
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(255, 65, 108, 0.7); }
+            50% { box-shadow: 0 0 0 20px rgba(255, 65, 108, 0); }
         }
         
         .error-title {
             font-weight: bold;
-            margin-bottom: 5px;
+            margin-bottom: 15px;
+            font-size: 22px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .error-title:before {
+            content: "⚠️";
+            font-size: 24px;
         }
         
         .error-message {
             font-family: 'Consolas', 'Monaco', monospace;
-            font-size: 14px;
+            font-size: 18px;
             white-space: pre-wrap;
             word-break: break-all;
+            line-height: 1.6;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 10px;
+            margin-top: 15px;
+            border: 1px solid rgba(255, 65, 108, 0.3);
         }
         
         .close-error {
             float: right;
             background: none;
             border: none;
-            color: #e74c3c;
+            color: #ff416c;
             cursor: pointer;
-            font-size: 18px;
+            font-size: 32px;
+            line-height: 1;
+            padding: 10px;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .close-error:hover {
+            background-color: rgba(255, 65, 108, 0.1);
+            transform: rotate(90deg);
         }
         
         .results-section {
-            margin-top: 40px;
+            padding: 50px;
         }
         
         .result-card {
-            background-color: white;
-            border-radius: 8px;
-            padding: 25px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-            margin-bottom: 30px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 25px;
+            padding: 40px;
+            margin-bottom: 50px;
             opacity: 0;
-            transform: translateY(20px);
-            animation: fadeInUp 0.5s ease forwards;
+            transform: translateY(50px);
+            animation: slideUp 1s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.2);
+            position: relative;
+            overflow: hidden;
         }
         
-        @keyframes fadeInUp {
+        .result-card:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 10px;
+            background: linear-gradient(90deg, #667eea, #764ba2, #00b09b, #96c93d);
+        }
+        
+        @keyframes slideUp {
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -202,128 +398,263 @@
         }
         
         .result-card h2 {
-            margin-bottom: 20px;
+            margin-bottom: 30px;
             color: #2c3e50;
-            font-size: 1.4rem;
+            font-size: 2rem;
+            font-weight: 800;
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 15px;
+            padding-bottom: 20px;
+            border-bottom: 3px solid rgba(102, 126, 234, 0.1);
         }
         
         .result-card h2:before {
-            content: "►";
-            color: #3498db;
-            font-size: 0.9em;
+            content: "✨";
+            font-size: 1.8rem;
         }
         
         .highlighted-text {
             font-family: Arial, sans-serif;
-            line-height: 2.0;
-            padding: 15px;
-            border-radius: 4px;
-            background-color: #f9f9f9;
-            border: 1px solid #eee;
+            line-height: 2.2;
+            padding: 35px;
+            border-radius: 15px;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4edf5 100%);
+            border: 2px solid rgba(102, 126, 234, 0.2);
             overflow-wrap: break-word;
+            font-size: 20px;
+            box-shadow: inset 0 8px 32px rgba(0, 0, 0, 0.05);
+            min-height: 300px;
         }
         
         .entity {
-            background-color: #7FDBFF;
-            padding: 4px 8px;
-            margin: 4px;
-            border-radius: 8px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 10px 20px;
+            margin: 8px;
+            border-radius: 12px;
             display: inline-block;
+            font-weight: 700;
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+            transition: all 0.3s;
+            color: white;
+            font-size: 18px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+        
+        .entity:hover {
+            transform: translateY(-4px) scale(1.05);
+            box-shadow: 0 12px 30px rgba(102, 126, 234, 0.6);
         }
         
         .entity-task {
-            background-color: #FFDC00;
+            background: linear-gradient(135deg, #00b09b 0%, #96c93d 100%);
+            box-shadow: 0 6px 20px rgba(0, 176, 155, 0.4);
         }
         
         .entity-condition {
-            background-color: #FF851B;
+            background: linear-gradient(135deg, #ff416c 0%, #ff4b2b 100%);
+            box-shadow: 0 6px 20px rgba(255, 65, 108, 0.4);
         }
         
         .entity-task-info {
-            background-color: #2ECC40;
+            background: linear-gradient(135deg, #ffb347 0%, #ffcc33 100%);
+            box-shadow: 0 6px 20px rgba(255, 179, 71, 0.4);
         }
         
         .entity-o {
-            background-color: #DDDDDD;
+            background: linear-gradient(135deg, #8e9eab 0%, #eef2f3 100%);
+            color: #333;
+            box-shadow: 0 6px 20px rgba(142, 158, 171, 0.4);
         }
         
         .entity-label {
             font-size: 0.8em;
-            opacity: 0.6;
+            opacity: 0.9;
+            margin-left: 8px;
+            font-weight: 600;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 3px 10px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
         }
         
         .plantuml-text {
             font-family: 'Consolas', 'Monaco', monospace;
             white-space: pre-wrap;
-            background-color: #2c3e50;
-            color: #ecf0f1;
-            padding: 20px;
-            border-radius: 4px;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #e6e6ff;
+            padding: 25px;
+            border-radius: 15px;
             overflow-x: auto;
-            margin-bottom: 20px;
+            margin-bottom: 30px;
+            font-size: 16px;
+            line-height: 1.6;
+            border: 3px solid rgba(102, 126, 234, 0.3);
+            box-shadow: inset 0 8px 32px rgba(0, 0, 0, 0.3);
+            min-height: 250px;
+            max-height: 350px;
+            overflow-y: auto;
         }
         
-        .visualization-container {
-            display: flex;
-            flex-direction: column;
-            gap: 30px;
+        .plantuml-text::-webkit-scrollbar {
+            width: 12px;
+            height: 12px;
         }
         
+        .plantuml-text::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+        }
+        
+        .plantuml-text::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 8px;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        /* БОЛЬШИЕ КОНТЕЙНЕРЫ ДЛЯ ДИАГРАММ */
         .visualization {
             width: 100%;
-            min-height: 400px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background-color: #f9f9f9;
-            margin-bottom: 10px;
+            height: 900px;
+            border: 3px solid rgba(102, 126, 234, 0.2);
+            border-radius: 20px;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4edf5 100%);
+            margin-bottom: 30px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: inset 0 10px 50px rgba(0, 0, 0, 0.05);
         }
         
-        .visualization-placeholder {
-            color: #7f8c8d;
-            text-align: center;
-            padding: 40px;
+        /* КОНТЕЙНЕРЫ ДЛЯ ВИЗУАЛИЗАЦИЙ ЗАНИМАЮТ ВСЮ ОБЛАСТЬ */
+        .heatmap-container, 
+        .sankey-container, 
+        .plantuml-image-container {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 15px;
+        }
+        
+        /* КОНТЕЙНЕРЫ ДЛЯ ИЗОБРАЖЕНИЙ PLANTUML */
+        .plantuml-image-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        
+        .matrix-display {
+            font-family: 'Consolas', 'Monaco', monospace;
+            white-space: pre;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            padding: 25px;
+            border-radius: 15px;
+            overflow-x: auto;
+            margin-bottom: 30px;
+            font-size: 16px;
+            border: 2px solid rgba(102, 126, 234, 0.2);
+            box-shadow: inset 0 5px 20px rgba(0, 0, 0, 0.05);
+            min-height: 250px;
+            max-height: 350px;
+            overflow-y: auto;
+        }
+        
+        .visualization-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 3px solid rgba(102, 126, 234, 0.1);
+        }
+        
+        .visualization-title {
+            font-size: 24px;
+            color: #2c3e50;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .visualization-controls {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .visualization-btn {
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 700;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .visualization-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.6);
+        }
+        
+        .visualization-btn.download {
+            background: linear-gradient(135deg, #00b09b 0%, #96c93d 100%);
+            box-shadow: 0 5px 15px rgba(0, 176, 155, 0.4);
+        }
+        
+        .visualization-btn.download:hover {
+            box-shadow: 0 10px 25px rgba(0, 176, 155, 0.6);
         }
         
         .status-message {
-            padding: 15px;
-            margin: 20px 0;
-            border-radius: 4px;
+            padding: 20px;
+            margin: 30px 0;
+            border-radius: 15px;
             display: none;
+            font-size: 18px;
+            font-weight: 600;
+            backdrop-filter: blur(20px);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
         }
         
         .status-loading {
-            background-color: #e8f4fd;
-            color: #3498db;
-            border: 1px solid #3498db;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.2) 0%, rgba(118, 75, 162, 0.2) 100%);
+            color: #667eea;
+            border-color: #667eea;
         }
         
         .status-error {
-            background-color: #fde8e8;
-            color: #e74c3c;
-            border: 1px solid #e74c3c;
+            background: linear-gradient(135deg, rgba(255, 65, 108, 0.2) 0%, rgba(255, 75, 43, 0.2) 100%);
+            color: #ff416c;
+            border-color: #ff416c;
         }
         
         .status-success {
-            background-color: #e8f8ef;
-            color: #27ae60;
-            border: 1px solid #27ae60;
+            background: linear-gradient(135deg, rgba(0, 176, 155, 0.2) 0%, rgba(150, 201, 61, 0.2) 100%);
+            color: #00b09b;
+            border-color: #00b09b;
         }
         
         .loading-spinner {
             display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 3px solid rgba(52, 152, 219, 0.3);
+            width: 30px;
+            height: 30px;
+            border: 4px solid rgba(102, 126, 234, 0.3);
             border-radius: 50%;
-            border-top-color: #3498db;
+            border-top-color: #667eea;
             animation: spin 1s ease-in-out infinite;
-            margin-right: 10px;
+            margin-right: 15px;
+            vertical-align: middle;
         }
         
         @keyframes spin {
@@ -333,129 +664,344 @@
         .url-link {
             display: block;
             margin-top: 15px;
-            color: #3498db;
+            color: white;
             word-break: break-all;
             text-decoration: none;
+            font-size: 14px;
+            padding: 12px 25px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 10px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            transition: all 0.3s;
+            text-align: center;
+            font-weight: 600;
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
         }
         
         .url-link:hover {
-            text-decoration: underline;
+            background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+            transform: translateY(-4px);
+            box-shadow: 0 12px 30px rgba(102, 126, 234, 0.6);
+            text-decoration: none;
         }
         
-        .heatmap-container, .sankey-container {
+        .fullscreen-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
             width: 100%;
             height: 100%;
-            display: flex;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 9999;
+            display: none;
             justify-content: center;
             align-items: center;
+            padding: 10px;
         }
         
-        .matrix-display {
-            font-family: 'Consolas', 'Monaco', monospace;
-            white-space: pre;
-            background-color: #f8f9fa;
+        .fullscreen-content {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            border-radius: 15px;
             padding: 15px;
-            border-radius: 4px;
-            overflow-x: auto;
-            margin-top: 10px;
+            width: 98%;
+            height: 98%;
+            overflow: hidden;
+            position: relative;
+            border: 3px solid rgba(102, 126, 234, 0.5);
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.8);
         }
         
-        @media (max-width: 768px) {
-            .test-buttons, .main-buttons {
-                flex-direction: column;
+        .close-fullscreen {
+            position: fixed;
+            top: 15px;
+            right: 15px;
+            background: linear-gradient(135deg, #ff416c 0%, #ff4b2b 100%);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 45px;
+            height: 45px;
+            font-size: 22px;
+            cursor: pointer;
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+            box-shadow: 0 6px 20px rgba(255, 65, 108, 0.6);
+        }
+        
+        .close-fullscreen:hover {
+            transform: rotate(90deg) scale(1.1);
+            box-shadow: 0 15px 30px rgba(255, 65, 108, 0.8);
+        }
+        
+        /* АДАПТИВНЫЕ СТИЛИ */
+        @media (max-width: 1600px) {
+            .main-container {
+                padding: 20px;
             }
             
-            .test-btn, .process-btn, .reset-btn {
-                width: 100%;
+            .visualization {
+                height: 800px;
             }
-            
-            .container {
-                padding: 10px;
+        }
+        
+        @media (max-width: 1200px) {
+            h1 {
+                font-size: 2.5rem;
             }
             
             .input-section, .result-card {
-                padding: 15px;
+                padding: 30px;
+            }
+            
+            .visualization {
+                height: 700px;
+            }
+            
+            .visualization-header {
+                flex-direction: column;
+                gap: 10px;
+                text-align: center;
+            }
+            
+            .visualization-controls {
+                width: 100%;
+                justify-content: center;
+                flex-wrap: wrap;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2rem;
+                padding: 30px 0 15px;
+            }
+            
+            .input-section, .result-card {
+                padding: 20px;
+            }
+            
+            .test-btn, .process-btn, .reset-btn {
+                padding: 15px 20px;
+                font-size: 16px;
+                min-width: auto;
+            }
+            
+            .main-buttons {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .visualization {
+                height: 600px;
+            }
+            
+            .plantuml-text {
+                min-height: 200px;
+                max-height: 300px;
+            }
+            
+            .highlighted-text {
+                min-height: 250px;
+            }
+            
+            .result-card h2 {
+                font-size: 1.5rem;
+            }
+            
+            .visualization-btn {
+                padding: 8px 15px;
+                font-size: 12px;
+            }
+            
+            .highlighted-text {
+                padding: 20px;
+                font-size: 16px;
+                min-height: 200px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 1.6rem;
+            }
+            
+            .main-container {
+                padding: 10px;
+            }
+            
+            .input-section h2, .result-card h2 {
+                font-size: 1.3rem;
+            }
+            
+            .visualization {
+                height: 500px;
+            }
+            
+            .plantuml-text, .matrix-display {
+                padding: 10px;
+                font-size: 12px;
+                min-height: 150px;
+                max-height: 250px;
+            }
+            
+            .highlighted-text {
+                min-height: 200px;
+            }
+            
+            .visualization-header {
+                margin-bottom: 15px;
+            }
+            
+            .visualization-controls {
+                gap: 5px;
+            }
+            
+            .visualization-btn {
+                padding: 6px 10px;
+                font-size: 11px;
+            }
+            
+            .url-link {
+                padding: 10px 15px;
+                font-size: 12px;
             }
         }
     </style>
     <script src="https://cdn.plot.ly/plotly-2.24.1.min.js"></script>
     <!-- PlantUML Encoder -->
     <script src="https://cdn.jsdelivr.net/npm/pako@2.1.0/dist/pako.min.js"></script>
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
-    <div class="container">
-        <h1>BPMN Process Visualizer</h1>
-        
-        <div class="input-section">
-            <h2>Enter process text:</h2>
+    <div class="background-wrapper"></div>
+    
+    <div class="main-container">
+        <div class="glass-card">
+            <h1><i class="fas fa-project-diagram"></i> UML Process Visualizer</h1>
             
-            <div class="test-buttons">
-                <button class="test-btn" data-test="1">Test 1: Simple process</button>
-                <button class="test-btn" data-test="2">Test 2: Conditional process</button>
-                <button class="test-btn" data-test="3">Test 3: Complex multi-participant process</button>
-            </div>
-            
-            <textarea id="process-text" placeholder="Enter business process description here..."></textarea>
-            
-            <div class="main-buttons">
-                <button id="process-btn" class="process-btn">Process Text</button>
-                <button id="reset-btn" class="reset-btn">Reset</button>
-            </div>
-            
-            <div class="progress-section" id="progress-section">
-                <div class="progress-bar-container">
-                    <div class="progress-bar" id="progress-bar"></div>
+            <div class="input-section">
+                <h2><i class="fas fa-keyboard"></i> Enter Process Description</h2>
+                
+                <div class="test-buttons">
+                    <button class="test-btn" data-test="1">
+                        <i class="fas fa-file-alt"></i> Test 1: Simple Process
+                    </button>
+                    <button class="test-btn" data-test="2">
+                        <i class="fas fa-code-branch"></i> Test 2: Conditional Process
+                    </button>
+                    <button class="test-btn" data-test="3">
+                        <i class="fas fa-users"></i> Test 3: Complex Multi-participant
+                    </button>
                 </div>
-                <div class="progress-text" id="progress-text">Processing...</div>
+                
+                <textarea id="process-text" placeholder="Describe your business process here... 
+Example: Employee submits a vacation request. Manager reviews the request. If approved, HR department processes the vacation. Otherwise, manager informs the employee."></textarea>
+                
+                <div class="main-buttons">
+                    <button id="process-btn" class="process-btn">
+                        <i class="fas fa-play-circle"></i> Process Text
+                    </button>
+                    <button id="reset-btn" class="reset-btn">
+                        <i class="fas fa-redo"></i> Reset All
+                    </button>
+                </div>
+                
+                <div class="progress-section" id="progress-section">
+                    <div class="progress-bar-container">
+                        <div class="progress-bar" id="progress-bar"></div>
+                    </div>
+                    <div class="progress-text" id="progress-text">Processing...</div>
+                </div>
+                
+                <div class="error-section" id="error-section">
+                    <button class="close-error" id="close-error">×</button>
+                    <div class="error-title">
+                        <i class="fas fa-exclamation-triangle"></i> Error
+                    </div>
+                    <div class="error-message" id="error-message"></div>
+                </div>
             </div>
             
-            <div class="error-section" id="error-section">
-                <button class="close-error" id="close-error">×</button>
-                <div class="error-title">Error</div>
-                <div class="error-message" id="error-message"></div>
+            <div id="status-message" class="status-message"></div>
+            
+            <div class="results-section">
+                <div id="result-highlighting" class="result-card" style="display: none;">
+                    <h2><i class="fas fa-highlighter"></i> ENTITY HIGHLIGHTING</h2>
+                    <div id="highlighted-text" class="highlighted-text">
+                        <!-- Entity highlighting will appear here -->
+                    </div>
+                </div>
+                
+                <div id="result-plantuml" class="result-card" style="display: none;">
+                    <div class="visualization-header">
+                        <h2><i class="fas fa-sitemap"></i> PLANTUML UML DIAGRAM</h2>
+                        <div class="visualization-controls">
+                            <button class="visualization-btn" onclick="toggleFullscreen('plantuml-image')">
+                                <i class="fas fa-expand"></i> Fullscreen
+                            </button>
+                            <button class="visualization-btn" onclick="refreshPlantUML()">
+                                <i class="fas fa-sync"></i> Refresh
+                            </button>
+                            <button class="visualization-btn download" onclick="downloadPlantUML()">
+                                <i class="fas fa-download"></i> Download
+                            </button>
+                        </div>
+                    </div>
+                    <div id="plantuml-text" class="plantuml-text"></div>
+                    <div id="plantuml-image" class="visualization">
+                        <!-- PlantUML image will appear here -->
+                    </div>
+                    <a id="plantuml-url" class="url-link" href="#" target="_blank" style="display: none;">
+                        <i class="fas fa-external-link-alt"></i> Open PlantUML diagram in new tab
+                    </a>
+                </div>
+                
+                <div id="result-heatmap" class="result-card" style="display: none;">
+                    <div class="visualization-header">
+                        <h2><i class="fas fa-fire"></i> INTERACTION MATRIX & HEATMAP</h2>
+                        <div class="visualization-controls">
+                            <button class="visualization-btn" onclick="toggleFullscreen('heatmap-visualization')">
+                                <i class="fas fa-expand"></i> Fullscreen
+                            </button>
+                            <button class="visualization-btn download" onclick="downloadHeatmap()">
+                                <i class="fas fa-download"></i> Download
+                            </button>
+                        </div>
+                    </div>
+                    <div id="matrix-text" class="matrix-display"></div>
+                    <div id="heatmap-visualization" class="visualization">
+                        <!-- Heatmap will appear here -->
+                    </div>
+                </div>
+                
+                <div id="result-sankey" class="result-card" style="display: none;">
+                    <div class="visualization-header">
+                        <h2><i class="fas fa-water"></i> SANKEY DIAGRAM</h2>
+                        <div class="visualization-controls">
+                            <button class="visualization-btn" onclick="toggleFullscreen('sankey-visualization')">
+                                <i class="fas fa-expand"></i> Fullscreen
+                            </button>
+                            <button class="visualization-btn download" onclick="downloadSankey()">
+                                <i class="fas fa-download"></i> Download
+                            </button>
+                        </div>
+                    </div>
+                    <div id="sankey-visualization" class="visualization">
+                        <!-- Sankey diagram will appear here -->
+                    </div>
+                </div>
             </div>
         </div>
-        
-        <div id="status-message" class="status-message"></div>
-        
-        <div class="results-section">
-            <div id="result-highlighting" class="result-card" style="display: none;">
-                <h2>=== ENTITY HIGHLIGHTING ===</h2>
-                <div id="highlighted-text" class="highlighted-text">
-                    Entity highlighting result will appear here...
-                </div>
-            </div>
-            
-            <div id="result-plantuml" class="result-card" style="display: none;">
-                <h2>=== PLANTUML BPMN ===</h2>
-                <div id="plantuml-text" class="plantuml-text"></div>
-                <div id="plantuml-image" class="visualization">
-                    <div class="visualization-placeholder">
-                        BPMN diagram will be displayed here
-                    </div>
-                </div>
-                <a id="plantuml-url" class="url-link" href="#" target="_blank" style="display: none;"></a>
-            </div>
-            
-            <div id="result-heatmap" class="result-card" style="display: none;">
-                <h2>=== INTERACTION MATRIX + HEATMAP ===</h2>
-                <div id="matrix-text" class="matrix-display"></div>
-                <div id="heatmap-visualization" class="visualization">
-                    <div class="visualization-placeholder">
-                        Interaction heatmap will be displayed here
-                    </div>
-                </div>
-            </div>
-            
-            <div id="result-sankey" class="result-card" style="display: none;">
-                <h2>=== SANKEY DIAGRAM ===</h2>
-                <div id="sankey-visualization" class="visualization">
-                    <div class="visualization-placeholder">
-                        Sankey diagram will be displayed here
-                    </div>
-                </div>
-            </div>
-        </div>
+    </div>
+    
+    <!-- Fullscreen overlay -->
+    <div id="fullscreen-overlay" class="fullscreen-overlay">
+        <button class="close-fullscreen" onclick="closeFullscreen()">×</button>
+        <div class="fullscreen-content" id="fullscreen-content"></div>
     </div>
 
     <script>
@@ -463,9 +1009,9 @@
         const testCases = {
             1: `Employee submits a vacation request. Manager reviews the request. If approved, HR department processes the vacation. Otherwise, manager informs the employee.`,
             
-            2: `The customer places an order. The system checks the payment. If the payment is approved, the warehouse prepares the package.`,
+            2: `Customer submits a product return request. Support service checks the request. If product meets return conditions, finance department approves refund, system processes payment. Otherwise, support service informs customer about rejection.`,
             
-            3: `The customer submits a refund request, the support agent reviews the request and if the request is valid, the finance department approves the refund, the system processes the payment, the customer receives a confirmation email else the support agent informs the customer. `
+            3: `Customer sends development request. Project manager analyzes the request. If request matches company capabilities, sales department prepares commercial proposal, technical department estimates timelines. If proposal accepted, development department starts work, testers verify result. Otherwise, project manager informs customer about refusal.`
         };
 
         // Initialize test buttons
@@ -474,6 +1020,11 @@
                 const testNumber = this.getAttribute('data-test');
                 document.getElementById('process-text').value = testCases[testNumber];
                 showStatus(`Loaded test case ${testNumber}`, 'success');
+                // Animate button
+                this.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    this.style.transform = '';
+                }, 150);
             });
         });
 
@@ -487,6 +1038,80 @@
         document.getElementById('close-error').addEventListener('click', () => {
             document.getElementById('error-section').style.display = 'none';
         });
+        
+        // Fullscreen functions
+        function toggleFullscreen(elementId) {
+            const element = document.getElementById(elementId);
+            const overlay = document.getElementById('fullscreen-overlay');
+            const content = document.getElementById('fullscreen-content');
+            
+            content.innerHTML = element.innerHTML;
+            
+            // Adjust for fullscreen
+            const images = content.querySelectorAll('img');
+            images.forEach(img => {
+                img.style.maxWidth = '100%';
+                img.style.maxHeight = '90vh';
+                img.style.objectFit = 'contain';
+            });
+            
+            overlay.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+            
+            // Also show Plotly figures in fullscreen
+            if (elementId === 'heatmap-visualization' || elementId === 'sankey-visualization') {
+                setTimeout(() => {
+                    Plotly.Plots.resize(content);
+                }, 100);
+            }
+        }
+        
+        function closeFullscreen() {
+            const overlay = document.getElementById('fullscreen-overlay');
+            overlay.style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+        
+        // Download functions
+        function downloadPlantUML() {
+            const url = document.getElementById('plantuml-url').href;
+            if (url && url !== '#') {
+                window.open(url, '_blank');
+            }
+        }
+        
+        function downloadHeatmap() {
+            const plotDiv = document.getElementById('heatmap-visualization');
+            if (plotDiv && plotDiv.querySelector('.plotly')) {
+                Plotly.downloadImage(plotDiv, {
+                    format: 'png',
+                    height: 1200,
+                    width: 1600,
+                    filename: 'uml-heatmap'
+                });
+            }
+        }
+        
+        function downloadSankey() {
+            const plotDiv = document.getElementById('sankey-visualization');
+            if (plotDiv && plotDiv.querySelector('.plotly')) {
+                Plotly.downloadImage(plotDiv, {
+                    format: 'png',
+                    height: 1200,
+                    width: 1600,
+                    filename: 'uml-sankey'
+                });
+            }
+        }
+        
+        // Refresh PlantUML
+        function refreshPlantUML() {
+            const plantumlText = document.getElementById('plantuml-text').textContent;
+            if (plantumlText) {
+                showPlantUML(plantumlText);
+                showStatus('Diagram refreshed', 'success');
+            }
+        }
         
         // Function to process text
         async function processText() {
@@ -516,10 +1141,18 @@
                 generateDemoResults(text);
                 
                 // Show success
-                showStatus('Processing completed successfully!', 'success');
+                showStatus('✅ Processing completed successfully! Visualizations are ready.', 'success');
+                
+                // Scroll to results
+                setTimeout(() => {
+                    document.querySelector('.results-section').scrollIntoView({ 
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }, 500);
                 
             } catch (error) {
-                showError(`Processing error: ${error.message}`);
+                showError(`❌ Processing error: ${error.message}`);
             } finally {
                 // Hide progress bar after delay
                 setTimeout(() => {
@@ -532,17 +1165,18 @@
         // Simulate processing with progress
         async function simulateProcessing(progressBar, progressText) {
             const steps = [
-                {percent: 10, text: "Parsing text..."},
-                {percent: 25, text: "Extracting entities..."},
-                {percent: 40, text: "Identifying process participants..."},
-                {percent: 60, text: "Generating BPMN diagram..."},
-                {percent: 80, text: "Creating visualizations..."},
-                {percent: 95, text: "Finalizing results..."},
-                {percent: 100, text: "Complete!"}
+                {percent: 10, text: "📖 Parsing text structure..."},
+                {percent: 25, text: "🔍 Extracting entities and participants..."},
+                {percent: 40, text: "👥 Identifying process relationships..."},
+                {percent: 55, text: "📊 Generating UML diagram..."},
+                {percent: 70, text: "🔥 Creating interaction heatmap..."},
+                {percent: 85, text: "🌊 Generating Sankey flow diagram..."},
+                {percent: 95, text: "🎨 Finalizing visualizations..."},
+                {percent: 100, text: "✅ Complete! Rendering results..."}
             ];
             
             for (const step of steps) {
-                await new Promise(resolve => setTimeout(resolve, 300 + Math.random() * 400));
+                await new Promise(resolve => setTimeout(resolve, 500 + Math.random() * 400));
                 progressBar.style.width = step.percent + '%';
                 progressText.textContent = step.text;
             }
@@ -555,10 +1189,16 @@
             errorMessage.textContent = message;
             errorSection.style.display = 'block';
             
-            // Auto-hide error after 10 seconds
+            // Scroll to error
+            errorSection.scrollIntoView({ 
+                behavior: 'smooth',
+                block: 'center'
+            });
+            
+            // Auto-hide error after 15 seconds
             setTimeout(() => {
                 errorSection.style.display = 'none';
-            }, 10000);
+            }, 15000);
         }
         
         // Hide error
@@ -573,8 +1213,11 @@
             hideStatus();
             hideError();
             document.getElementById('progress-section').style.display = 'none';
-            showStatus('Application reset', 'success');
+            showStatus('🔄 Application reset. Ready for new input.', 'success');
             setTimeout(hideStatus, 2000);
+            
+            // Scroll to top
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
         
         // Hide all results
@@ -588,12 +1231,21 @@
         // Show status
         function showStatus(message, type) {
             const statusEl = document.getElementById('status-message');
-            statusEl.textContent = message;
+            statusEl.innerHTML = message;
             statusEl.className = `status-message status-${type}`;
             statusEl.style.display = 'block';
             
             if (type === 'loading') {
                 statusEl.innerHTML = `<span class="loading-spinner"></span> ${message}`;
+            }
+            
+            // Auto-hide success messages
+            if (type === 'success') {
+                setTimeout(() => {
+                    if (statusEl.className.includes('status-success')) {
+                        hideStatus();
+                    }
+                }, 5000);
             }
         }
         
@@ -624,7 +1276,8 @@
                 generateSankey(agents);
                 
             } catch (error) {
-                showError(`Failed to generate results: ${error.message}`);
+                showError(`❌ Failed to generate results: ${error.message}`);
+                console.error('Generation error:', error);
             }
         }
         
@@ -637,11 +1290,11 @@
             words.forEach(word => {
                 const cleanWord = word.replace(/[.,]/g, '').toLowerCase();
                 
-                if (['department', 'service', 'employee', 'customer', 'manager', 'client', 'tester'].some(term => cleanWord.includes(term))) {
+                if (['department', 'service', 'employee', 'customer', 'manager', 'client', 'tester', 'project', 'team', 'system'].some(term => cleanWord.includes(term))) {
                     entities.push({text: word, type: 'AGENT'});
-                } else if (['submits', 'reviews', 'checks', 'analyzes', 'prepares', 'estimates', 'starts', 'processes', 'informs', 'verifies'].some(term => cleanWord.includes(term))) {
+                } else if (['submits', 'reviews', 'checks', 'analyzes', 'prepares', 'estimates', 'starts', 'processes', 'informs', 'verifies', 'sends', 'approves', 'accepts'].some(term => cleanWord.includes(term))) {
                     entities.push({text: word, type: 'TASK'});
-                } else if (['if', 'otherwise'].includes(cleanWord)) {
+                } else if (['if', 'otherwise', 'when', 'then'].includes(cleanWord)) {
                     entities.push({text: word, type: 'CONDITION'});
                 } else {
                     entities.push({text: word, type: 'O'});
@@ -658,12 +1311,13 @@
             
             sentences.forEach(sentence => {
                 if (sentence.includes('department') || sentence.includes('service') || sentence.includes('employee') || 
-                    sentence.includes('customer') || sentence.includes('manager') || sentence.includes('client')) {
+                    sentence.includes('customer') || sentence.includes('manager') || sentence.includes('client') ||
+                    sentence.includes('project') || sentence.includes('team') || sentence.includes('system')) {
                     
                     // Simplified agent extraction
                     const words = sentence.trim().split(/\s+/);
                     if (words.length > 0) {
-                        const agent = words.slice(0, Math.min(3, words.length)).join(' ');
+                        const agent = words.slice(0, Math.min(4, words.length)).join(' ');
                         if (agent && !agents.includes(agent)) {
                             agents.push(agent);
                         }
@@ -673,7 +1327,7 @@
             
             // If no agents found, create demo agents
             if (agents.length === 0) {
-                return ['Employee', 'Manager', 'HR Department', 'Finance Department'];
+                return ['Employee', 'Manager', 'HR Department', 'Finance Department', 'Support Service'];
             }
             
             return agents;
@@ -711,67 +1365,89 @@
         function createEntitySpan(text, type) {
             const typeClass = `entity-${type.toLowerCase()}`;
             const displayType = type !== 'O' ? type : '';
+            const icon = type === 'AGENT' ? '👤' : type === 'TASK' ? '⚙️' : type === 'CONDITION' ? '🔀' : '';
             
             return `
                 <span class="entity ${typeClass}">
-                    ${text}
+                    ${icon} ${text}
                     ${displayType ? `<span class="entity-label">${displayType}</span>` : ''}
                 </span>
             `;
         }
         
-        // Generate PlantUML text - CORRECT SYNTAX
+        // Generate PlantUML text
         function generatePlantUML(text) {
             const agents = extractAgents(text);
             const hasCondition = text.toLowerCase().includes('if') || text.toLowerCase().includes('otherwise');
             
             let plantuml = `@startuml\n`;
-            plantuml += `title Business Process Diagram\n\n`;
+            plantuml += `!theme plain\n`;
+            plantuml += `skinparam backgroundColor #FFFFFF\n`;
+            plantuml += `skinparam sequence {\n`;
+            plantuml += `  ArrowColor #667eea\n`;
+            plantuml += `  ActorBorderColor #000000\n`;
+            plantuml += `  ActorBackgroundColor #E1F5FE\n`;
+            plantuml += `  ParticipantBorderColor #667eea\n`;
+            plantuml += `  ParticipantBackgroundColor #F8F9FF\n`;
+            plantuml += `  LifeLineBorderColor #667eea\n`;
+            plantuml += `  LifeLineBackgroundColor #FFFFFF\n`;
+            plantuml += `  ParticipantFontSize 16\n`;
+            plantuml += `  ActorFontSize 16\n`;
+            plantuml += `}\n\n`;
+            plantuml += `title **<color:#667eea>UML Sequence Diagram</color>**\n`;
+            plantuml += `caption Generated from: "${text.substring(0, 100)}${text.length > 100 ? '...' : ''}"\n\n`;
             
             // Get unique agents
             const uniqueAgents = [...new Set(agents.map(agent => 
-                agent.split(' ').slice(0, 2).join(' ')
-            ))].slice(0, 4);
+                agent.split(' ').slice(0, 3).join(' ')
+            ))].slice(0, 6);
             
             if (uniqueAgents.length === 0) {
-                uniqueAgents.push('Employee', 'Manager', 'HR Department');
+                uniqueAgents.push('Employee', 'Manager', 'HR Department', 'Finance', 'Support', 'System');
             }
             
-            // Add participants with simple names
+            // Add participants
             uniqueAgents.forEach((agent, index) => {
-                // Clean name for PlantUML
-                const cleanName = agent.length > 20 ? agent.substring(0, 20) + "..." : agent;
-                plantuml += `participant "${cleanName}" as P${index}\n`;
+                const cleanName = agent.length > 30 ? agent.substring(0, 30) + "..." : agent;
+                plantuml += `participant "<color:#667eea><b>${cleanName}</b></color>" as P${index}\n`;
             });
             
             plantuml += `\n`;
             
             // Add process flow
             if (uniqueAgents.length >= 2) {
-                plantuml += `P0 -> P1 : Submit request\n`;
+                plantuml += `P0 -> P1 : **<color:#00b09b>Submit request</color>**\n`;
+                plantuml += `activate P1\n`;
+                
                 if (uniqueAgents.length >= 3) {
-                    plantuml += `P1 -> P2 : Review request\n`;
+                    plantuml += `P1 -> P2 : **<color:#00b09b>Review request</color>**\n`;
+                    plantuml += `activate P2\n`;
                 }
             }
             
-            // Add conditional flow - CORRECT PlantUML syntax
+            // Add conditional flow
             if (hasCondition) {
                 plantuml += `\n`;
-                plantuml += `alt Request approved\n`;
+                plantuml += `alt **<color:#667eea>Request approved</color>**\n`;
                 
                 if (uniqueAgents.length >= 3) {
-                    plantuml += `  P2 -> P0 : Process\n`;
+                    plantuml += `  P2 -> P0 : **<color:#96c93d>Process request</color>**\n`;
+                    plantuml += `  deactivate P2\n`;
                 } else if (uniqueAgents.length >= 2) {
-                    plantuml += `  P1 -> P0 : Process\n`;
+                    plantuml += `  P1 -> P0 : **<color:#96c93d>Process request</color>**\n`;
                 }
                 
-                plantuml += `else Request rejected\n`;
+                plantuml += `else **<color:#ff416c>Request rejected</color>**\n`;
                 if (uniqueAgents.length >= 2) {
-                    plantuml += `  P1 -> P0 : Inform\n`;
+                    plantuml += `  P1 -> P0 : **<color:#ff416c>Inform rejection</color>**\n`;
                 } else {
-                    plantuml += `  P0 -> P0 : Inform\n`;
+                    plantuml += `  P0 -> P0 : **<color:#ff416c>Inform rejection</color>**\n`;
                 }
                 plantuml += `end\n`;
+                
+                if (uniqueAgents.length >= 2) {
+                    plantuml += `deactivate P1\n`;
+                }
             }
             
             plantuml += `\n@enduml`;
@@ -779,42 +1455,50 @@
             return plantuml;
         }
         
-        // Show PlantUML with CORRECT ENCODING
+        // Show PlantUML
         function showPlantUML(plantumlText) {
             document.getElementById('plantuml-text').textContent = plantumlText;
             
             try {
-                // CORRECT PlantUML encoding with ~1 prefix
+                // CORRECT PlantUML encoding
                 const encoded = encodePlantUMLCorrect(plantumlText);
                 const url = `https://www.plantuml.com/plantuml/svg/${encoded}`;
-                
-                console.log("Generated PlantUML URL:", url);
                 
                 // Create image container
                 const imgContainer = document.getElementById('plantuml-image');
                 imgContainer.innerHTML = `
-                    <div style="text-align: center; padding: 20px; background: white; border-radius: 4px;">
+                    <div class="plantuml-image-container">
                         <img src="${url}" 
-                             alt="BPMN Diagram" 
-                             style="max-width: 100%; max-height: 500px; border: 1px solid #ddd;"
-                             onload="console.log('PlantUML image loaded successfully')"
-                             onerror="this.onerror=null; this.style.display='none'; this.parentElement.innerHTML='<div style=\\'padding:40px;color:#666;\\'><strong>⚠️ Diagram Preview</strong><br>View directly: <a href=\\'${url}\\' target=\\'_blank\\'>Open PlantUML ↗</a><br><small>Or copy PlantUML code above to <a href=\\'https://plantuml.com/\\' target=\\'_blank\\'>plantuml.com</a></small></div>'">
+                             alt="UML Diagram" 
+                             onload="console.log('PlantUML loaded successfully')"
+                             onerror="this.onerror=null; this.style.display='none'; this.parentElement.innerHTML='<div style=\'text-align:center; padding:20px;\'><div style=\'font-size:30px; margin-bottom:10px; color:#667eea;\'>⚠️</div><h3 style=\'color:#667eea; margin-bottom:10px; font-size:16px;\'>Diagram Preview Unavailable</h3><p style=\'color:#666; margin-bottom:15px; font-size:14px; max-width:350px; margin:0 auto 15px;\'>You can view the diagram directly via the link below:</p><a href=\'${url}\' target=\'_blank\' style=\'display:inline-block; padding:10px 20px; background:linear-gradient(135deg, #667eea 0%, #764ba2 100%); color:white; text-decoration:none; border-radius:10px; font-size:14px; font-weight:bold; box-shadow:0 5px 15px rgba(102,126,234,0.5);\'><i class=\'fas fa-external-link-alt\'></i> Open PlantUML in New Tab</a></div>'">
                     </div>`;
                 
                 // Show URL link
                 const urlLink = document.getElementById('plantuml-url');
                 urlLink.href = url;
-                urlLink.textContent = "Open PlantUML diagram in new tab ↗";
+                urlLink.innerHTML = '<i class="fas fa-external-link-alt"></i> Open PlantUML diagram in new tab';
                 urlLink.style.display = 'block';
                 
                 document.getElementById('result-plantuml').style.display = 'block';
                 
+                // Scroll to diagram
+                setTimeout(() => {
+                    imgContainer.scrollIntoView({ 
+                        behavior: 'smooth',
+                        block: 'center'
+                    });
+                }, 100);
+                
             } catch (error) {
                 console.error("PlantUML generation error:", error);
                 const imgContainer = document.getElementById('plantuml-image');
-                imgContainer.innerHTML = `<div class="visualization-placeholder" style="color:#e74c3c">
-                    <strong>Error generating diagram preview</strong><br>
-                    <small>Try copying the PlantUML code above to <a href="https://plantuml.com/" target="_blank">plantuml.com</a></small>
+                imgContainer.innerHTML = `<div class="plantuml-image-container">
+                    <div style="text-align:center; padding:15px; color:#ff416c">
+                        <div style="font-size: 30px; margin-bottom: 10px;">❌</div>
+                        <h3 style="font-size: 16px;">Error generating diagram</h3>
+                        <p style="font-size: 14px; max-width: 350px; margin: 10px auto;">Try copying the PlantUML code above to <a href="https://plantuml.com/" target="_blank" style="color:#667eea; font-weight:bold;">plantuml.com</a></p>
+                    </div>
                 </div>`;
                 document.getElementById('result-plantuml').style.display = 'block';
             }
@@ -826,7 +1510,7 @@
                 // Convert text to UTF-8 bytes
                 const utf8Bytes = new TextEncoder().encode(text);
                 
-                // Use pako for DEFLATE compression if available
+                // Use pako for DEFLATE compression
                 let compressed;
                 if (typeof pako !== 'undefined') {
                     compressed = pako.deflate(utf8Bytes, { level: 9 });
@@ -848,11 +1532,11 @@
                     .replace(/\//g, '_')
                     .replace(/=+$/, '');
                 
-                // ADD ~1 prefix for Huffman encoding (as per PlantUML error message)
+                // Add ~1 prefix for Huffman encoding
                 return '~1' + encoded;
                 
             } catch (error) {
-                console.error("Encoding error, using simple encoding:", error);
+                console.error("Encoding error:", error);
                 // Fallback: simple base64 encoding
                 const base64 = btoa(encodeURIComponent(text).replace(/%([0-9A-F]{2})/g, 
                     (match, p1) => String.fromCharCode('0x' + p1)));
@@ -866,16 +1550,10 @@
         
         // Simple DEFLATE compression fallback
         function simpleDeflate(bytes) {
-            // Very simple compression for PlantUML
             const result = [];
-            
-            // DEFLATE header (zlib format)
-            result.push(0x78, 0x9C); // CMF (0x78 = deflate, 32k window), FLG (0x9C = default compression)
-            
-            // Add compressed data (simplified)
+            // Simple compression for PlantUML
             let i = 0;
             while (i < bytes.length) {
-                // Find repeated bytes
                 let repeatCount = 1;
                 while (i + repeatCount < bytes.length && 
                        bytes[i + repeatCount] === bytes[i] && 
@@ -884,23 +1562,15 @@
                 }
                 
                 if (repeatCount > 3) {
-                    // Literal block with repeat
-                    result.push(bytes[i]);
-                    result.push(bytes[i]);
-                    result.push(repeatCount);
+                    result.push(bytes[i], bytes[i], repeatCount);
                     i += repeatCount;
                 } else {
-                    // Add literals
                     for (let j = 0; j < repeatCount; j++) {
                         result.push(bytes[i + j]);
                     }
                     i += repeatCount;
                 }
             }
-            
-            // Add Adler-32 checksum (simplified)
-            result.push(0x00, 0x00, 0x00, 0x01);
-            
             return result;
         }
         
@@ -909,23 +1579,28 @@
             if (agents.length === 0) return;
             
             // Clean agent names
-            const cleanAgents = agents.map(agent => agent.split(' ').slice(0, 2).join(' '));
+            const cleanAgents = agents.map(agent => agent.split(' ').slice(0, 3).join(' '));
             
-            // Create matrix
-            let matrixText = 'Participants: ' + cleanAgents.join(', ') + '\n\n';
-            matrixText += 'Interaction Matrix:\n';
+            // Create matrix with better formatting
+            let matrixText = 'PARTICIPANTS: ' + cleanAgents.map((agent, i) => `P${i}=${agent}`).join(', ') + '\n\n';
+            matrixText += 'INTERACTION MATRIX (0-10 interactions):\n\n';
+            
+            // Header
+            matrixText += '        ' + cleanAgents.map((_, i) => `P${i}`.padEnd(12)).join('') + '\n';
+            matrixText += '       ┌' + '─'.repeat(cleanAgents.length * 12 - 1) + '┐\n';
             
             for (let i = 0; i < cleanAgents.length; i++) {
-                let row = '';
+                matrixText += `P${i}    │`;
                 for (let j = 0; j < cleanAgents.length; j++) {
-                    if (i === j) {
-                        row += '  0';
-                    } else {
-                        row += '  ' + Math.floor(Math.random() * 3);
-                    }
+                    const value = i === j ? '    -    ' : `    ${Math.floor(Math.random() * 11)}    `;
+                    matrixText += value;
                 }
-                matrixText += '[' + row + '  ]\n';
+                matrixText += '│\n';
             }
+            
+            matrixText += '       └' + '─'.repeat(cleanAgents.length * 12 - 1) + '┘\n\n';
+            matrixText += 'Legend: - = Self-interaction (0)\n';
+            matrixText += '        Higher numbers = More interactions\n';
             
             document.getElementById('matrix-text').textContent = matrixText;
         }
@@ -939,14 +1614,28 @@
             
             try {
                 // Clean agent names
-                const cleanAgents = agents.map(agent => agent.split(' ').slice(0, 2).join(' '));
+                const cleanAgents = agents.map(agent => agent.split(' ').slice(0, 3).join(' '));
                 
                 // Create data
                 const data = [];
+                const annotations = [];
+                
                 for (let i = 0; i < cleanAgents.length; i++) {
                     const row = [];
                     for (let j = 0; j < cleanAgents.length; j++) {
-                        row.push(i === j ? 0 : Math.floor(Math.random() * 5));
+                        const value = i === j ? 0 : Math.floor(Math.random() * 10);
+                        row.push(value);
+                        
+                        // Add annotation for values > 5
+                        if (value > 5) {
+                            annotations.push({
+                                x: cleanAgents[j],
+                                y: cleanAgents[i],
+                                text: value.toString(),
+                                font: { color: 'white', size: 12, weight: 'bold' },
+                                showarrow: false
+                            });
+                        }
                     }
                     data.push(row);
                 }
@@ -956,22 +1645,74 @@
                     x: cleanAgents,
                     y: cleanAgents,
                     type: 'heatmap',
-                    colorscale: 'Viridis'
+                    colorscale: [
+                        [0, '#f7fbff'],
+                        [0.1, '#deebf7'],
+                        [0.2, '#c6dbef'],
+                        [0.3, '#9ecae1'],
+                        [0.4, '#6baed6'],
+                        [0.5, '#4292c6'],
+                        [0.6, '#2171b5'],
+                        [0.7, '#08519c'],
+                        [0.8, '#08306b'],
+                        [1, '#000033']
+                    ],
+                    hoverongaps: false,
+                    showscale: true,
+                    colorbar: {
+                        title: { text: 'Interactions', font: { size: 16 } },
+                        titleside: 'right',
+                        thickness: 20,
+                        len: 0.9
+                    },
+                    hovertemplate: 'From: %{y}<br>To: %{x}<br>Interactions: %{z}<extra></extra>'
                 };
                 
+                const container = document.getElementById('heatmap-visualization');
                 const layout = {
-                    title: 'Interaction Heatmap',
-                    xaxis: { title: 'To' },
-                    yaxis: { title: 'From' },
-                    width: document.getElementById('heatmap-visualization').offsetWidth - 40,
-                    height: 400
+                    title: {
+                        text: '<span style="font-size:20px; color:#667eea;">Participant Interaction Heatmap</span>',
+                        font: { size: 20, color: '#2c3e50' }
+                    },
+                    xaxis: { 
+                        title: { text: 'To Participant', font: { size: 16, color: '#667eea' } },
+                        tickangle: -45,
+                        tickfont: { size: 10 }
+                    },
+                    yaxis: { 
+                        title: { text: 'From Participant', font: { size: 16, color: '#667eea' } },
+                        autorange: 'reversed',
+                        tickfont: { size: 10 }
+                    },
+                    width: container.offsetWidth,
+                    height: container.offsetHeight,
+                    margin: { t: 60, r: 80, b: 80, l: 100 },
+                    annotations: annotations,
+                    paper_bgcolor: 'rgba(255,255,255,0.1)',
+                    plot_bgcolor: 'rgba(255,255,255,0.1)'
                 };
                 
-                Plotly.newPlot('heatmap-visualization', [trace], layout);
+                // Clear container and create plot
+                container.innerHTML = '';
+                const plotDiv = document.createElement('div');
+                plotDiv.style.width = '100%';
+                plotDiv.style.height = '100%';
+                container.appendChild(plotDiv);
+                Plotly.newPlot(plotDiv, [trace], layout);
                 document.getElementById('result-heatmap').style.display = 'block';
+                
+                // Resize on window resize
+                window.addEventListener('resize', function() {
+                    Plotly.Plots.resize(plotDiv);
+                });
+                
             } catch (error) {
                 const container = document.getElementById('heatmap-visualization');
-                container.innerHTML = `<div class="visualization-placeholder" style="color:#e74c3c">Heatmap error</div>`;
+                container.innerHTML = `<div style="text-align:center; padding:15px; color:#ff416c">
+                    <div style="font-size: 30px; margin-bottom: 10px;">🔥</div>
+                    <h3 style="font-size: 16px;">Heatmap Error</h3>
+                    <p style="font-size: 14px;">${error.message}</p>
+                </div>`;
                 document.getElementById('result-heatmap').style.display = 'block';
             }
         }
@@ -985,48 +1726,100 @@
             
             try {
                 // Clean agent names
-                const cleanAgents = agents.map(agent => agent.split(' ').slice(0, 2).join(' '));
+                const cleanAgents = agents.map(agent => agent.split(' ').slice(0, 3).join(' '));
                 
                 // Create data
                 const sources = [];
                 const targets = [];
                 const values = [];
                 
+                // Create main flow
                 for (let i = 0; i < cleanAgents.length - 1; i++) {
                     sources.push(i);
                     targets.push(i + 1);
-                    values.push(Math.floor(Math.random() * 10) + 1);
+                    values.push(Math.floor(Math.random() * 30) + 20);
+                }
+                
+                // Add some cross-connections for complexity
+                if (cleanAgents.length >= 3) {
+                    sources.push(0);
+                    targets.push(2);
+                    values.push(Math.floor(Math.random() * 25) + 10);
+                    
+                    sources.push(1);
+                    targets.push(cleanAgents.length - 1);
+                    values.push(Math.floor(Math.random() * 20) + 5);
+                }
+                
+                if (cleanAgents.length >= 4) {
+                    sources.push(2);
+                    targets.push(0);
+                    values.push(Math.floor(Math.random() * 15) + 5);
                 }
                 
                 const trace = {
                     type: "sankey",
                     orientation: "h",
+                    arrangement: "snap",
                     node: {
-                        pad: 15,
-                        thickness: 20,
-                        line: { color: "black", width: 0.5 },
+                        pad: 30,
+                        thickness: 25,
+                        line: {
+                            color: "black",
+                            width: 2
+                        },
                         label: cleanAgents,
-                        color: ["#3498db", "#2ecc71", "#e74c3c", "#f39c12"]
+                        color: ["#667eea", "#764ba2", "#00b09b", "#96c93d", "#ff416c", "#ff4b2b", "#ffb347", "#ffcc33"].slice(0, cleanAgents.length),
+                        hovertemplate: '%{label}<br>Total flow: %{value}<extra></extra>',
+                        x: cleanAgents.map((_, i) => i * (1 / (cleanAgents.length - 1))),
+                        y: cleanAgents.map((_, i) => 0.1 + (i % 2) * 0.3)
                     },
                     link: {
                         source: sources,
                         target: targets,
-                        value: values
+                        value: values,
+                        color: ["rgba(102, 126, 234, 0.6)", "rgba(118, 75, 162, 0.6)", "rgba(0, 176, 155, 0.6)", 
+                                "rgba(150, 201, 61, 0.6)", "rgba(255, 65, 108, 0.6)", "rgba(255, 75, 43, 0.6)",
+                                "rgba(255, 179, 71, 0.6)", "rgba(255, 204, 51, 0.6)"],
+                        hovertemplate: 'From: %{source.label}<br>To: %{target.label}<br>Value: %{value}<extra></extra>'
                     }
                 };
                 
+                const container = document.getElementById('sankey-visualization');
                 const layout = {
-                    title: "Resource Flow",
-                    font: { size: 12 },
-                    width: document.getElementById('sankey-visualization').offsetWidth - 40,
-                    height: 500
+                    title: {
+                        text: '<span style="font-size:20px; color:#667eea;">Resource Flow Diagram (Sankey)</span>',
+                        font: { size: 20, color: '#2c3e50' }
+                    },
+                    font: { size: 12, color: '#2c3e50' },
+                    width: container.offsetWidth,
+                    height: container.offsetHeight,
+                    margin: { t: 60, r: 40, b: 40, l: 100 },
+                    paper_bgcolor: 'rgba(255,255,255,0.1)',
+                    plot_bgcolor: 'rgba(255,255,255,0.1)'
                 };
                 
-                Plotly.newPlot('sankey-visualization', [trace], layout);
+                // Clear container and create plot
+                container.innerHTML = '';
+                const plotDiv = document.createElement('div');
+                plotDiv.style.width = '100%';
+                plotDiv.style.height = '100%';
+                container.appendChild(plotDiv);
+                Plotly.newPlot(plotDiv, [trace], layout);
                 document.getElementById('result-sankey').style.display = 'block';
+                
+                // Resize on window resize
+                window.addEventListener('resize', function() {
+                    Plotly.Plots.resize(plotDiv);
+                });
+                
             } catch (error) {
                 const container = document.getElementById('sankey-visualization');
-                container.innerHTML = `<div class="visualization-placeholder" style="color:#e74c3c">Sankey error</div>`;
+                container.innerHTML = `<div style="text-align:center; padding:15px; color:#ff416c">
+                    <div style="font-size: 30px; margin-bottom: 10px;">🌊</div>
+                    <h3 style="font-size: 16px;">Sankey Diagram Error</h3>
+                    <p style="font-size: 14px;">${error.message}</p>
+                </div>`;
                 document.getElementById('result-sankey').style.display = 'block';
             }
         }
@@ -1034,9 +1827,17 @@
         // Initialize with test text
         window.addEventListener('DOMContentLoaded', () => {
             document.getElementById('process-text').value = testCases[1];
+            
+            // Set initial focus with animation
+            setTimeout(() => {
+                const textarea = document.getElementById('process-text');
+                textarea.focus();
+                textarea.style.transform = 'scale(1.02)';
+                setTimeout(() => {
+                    textarea.style.transform = 'scale(1)';
+                }, 300);
+            }, 500);
         });
     </script>
 </body>
-
 </html>
-
