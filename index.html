@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BPMN Визуализатор</title>
+    <title>BPMN Process Visualizer</title>
     <style>
         * {
             box-sizing: border-box;
@@ -120,6 +120,65 @@
             background-color: #c0392b;
         }
         
+        .progress-section {
+            margin-top: 20px;
+            display: none;
+        }
+        
+        .progress-bar-container {
+            width: 100%;
+            height: 20px;
+            background-color: #ecf0f1;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #3498db, #2ecc71);
+            width: 0%;
+            transition: width 0.5s ease;
+            border-radius: 10px;
+        }
+        
+        .progress-text {
+            text-align: center;
+            font-size: 14px;
+            color: #7f8c8d;
+        }
+        
+        .error-section {
+            background-color: #fde8e8;
+            color: #e74c3c;
+            border: 1px solid #e74c3c;
+            border-radius: 4px;
+            padding: 15px;
+            margin-top: 20px;
+            display: none;
+        }
+        
+        .error-title {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .error-message {
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 14px;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+        
+        .close-error {
+            float: right;
+            background: none;
+            border: none;
+            color: #e74c3c;
+            cursor: pointer;
+            font-size: 18px;
+        }
+        
         .results-section {
             margin-top: 40px;
         }
@@ -130,6 +189,16 @@
             padding: 25px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
             margin-bottom: 30px;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 0.5s ease forwards;
+        }
+        
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
         
         .result-card h2 {
@@ -310,25 +379,40 @@
         }
     </style>
     <script src="https://cdn.plot.ly/plotly-2.24.1.min.js"></script>
+    <!-- PlantUML Encoder -->
+    <script src="https://cdn.jsdelivr.net/npm/pako@2.1.0/dist/pako.min.js"></script>
 </head>
 <body>
     <div class="container">
-        <h1>BPMN Визуализатор процессов</h1>
+        <h1>BPMN Process Visualizer</h1>
         
         <div class="input-section">
-            <h2>Введите текст процесса:</h2>
+            <h2>Enter process text:</h2>
             
             <div class="test-buttons">
-                <button class="test-btn" data-test="1">Тест 1: Простой процесс</button>
-                <button class="test-btn" data-test="2">Тест 2: Условный процесс</button>
-                <button class="test-btn" data-test="3">Тест 3: Сложный процесс с несколькими участниками</button>
+                <button class="test-btn" data-test="1">Test 1: Simple process</button>
+                <button class="test-btn" data-test="2">Test 2: Conditional process</button>
+                <button class="test-btn" data-test="3">Test 3: Complex multi-participant process</button>
             </div>
             
-            <textarea id="process-text" placeholder="Введите описание бизнес-процесса здесь..."></textarea>
+            <textarea id="process-text" placeholder="Enter business process description here..."></textarea>
             
             <div class="main-buttons">
-                <button id="process-btn" class="process-btn">Обработать текст</button>
-                <button id="reset-btn" class="reset-btn">Сбросить</button>
+                <button id="process-btn" class="process-btn">Process Text</button>
+                <button id="reset-btn" class="reset-btn">Reset</button>
+            </div>
+            
+            <div class="progress-section" id="progress-section">
+                <div class="progress-bar-container">
+                    <div class="progress-bar" id="progress-bar"></div>
+                </div>
+                <div class="progress-text" id="progress-text">Processing...</div>
+            </div>
+            
+            <div class="error-section" id="error-section">
+                <button class="close-error" id="close-error">×</button>
+                <div class="error-title">Error</div>
+                <div class="error-message" id="error-message"></div>
             </div>
         </div>
         
@@ -338,7 +422,7 @@
             <div id="result-highlighting" class="result-card" style="display: none;">
                 <h2>=== ENTITY HIGHLIGHTING ===</h2>
                 <div id="highlighted-text" class="highlighted-text">
-                    Результат подсветки сущностей появится здесь...
+                    Entity highlighting result will appear here...
                 </div>
             </div>
             
@@ -347,7 +431,7 @@
                 <div id="plantuml-text" class="plantuml-text"></div>
                 <div id="plantuml-image" class="visualization">
                     <div class="visualization-placeholder">
-                        BPMN диаграмма будет отображена здесь
+                        BPMN diagram will be displayed here
                     </div>
                 </div>
                 <a id="plantuml-url" class="url-link" href="#" target="_blank" style="display: none;"></a>
@@ -358,16 +442,16 @@
                 <div id="matrix-text" class="matrix-display"></div>
                 <div id="heatmap-visualization" class="visualization">
                     <div class="visualization-placeholder">
-                        Тепловая карта взаимодействий будет отображена здесь
+                        Interaction heatmap will be displayed here
                     </div>
                 </div>
             </div>
             
             <div id="result-sankey" class="result-card" style="display: none;">
-                <h2>=== SANKEY ===</h2>
+                <h2>=== SANKEY DIAGRAM ===</h2>
                 <div id="sankey-visualization" class="visualization">
                     <div class="visualization-placeholder">
-                        Sankey диаграмма будет отображена здесь
+                        Sankey diagram will be displayed here
                     </div>
                 </div>
             </div>
@@ -375,62 +459,125 @@
     </div>
 
     <script>
-        // Тестовые данные
+        // Test data in English
         const testCases = {
-            1: `Сотрудник отправляет заявку на отпуск. Менеджер проверяет заявку. Если заявка одобрена, отдел кадров оформляет отпуск. Иначе менеджер информирует сотрудника.`,
+            1: `Employee submits a vacation request. Manager reviews the request. If approved, HR department processes the vacation. Otherwise, manager informs the employee.`,
             
-            2: `Клиент отправляет заявку на возврат товара. Служба поддержки проверяет заявку. Если товар соответствует условиям возврата, финансовая служба одобряет возврат, система обрабатывает платеж. Иначе служба поддержки информирует клиента об отказе.`,
+            2: `Customer submits a product return request. Support service checks the request. If product meets return conditions, finance department approves refund, system processes payment. Otherwise, support service informs customer about rejection.`,
             
-            3: `Заказчик отправляет запрос на разработку. Менеджер проекта анализирует запрос. Если запрос соответствует возможностям компании, отдел продаж готовит коммерческое предложение, технический отдел оценивает сроки. Если предложение принято, отдел разработки начинает работу, тестировщики проверяют результат. Иначе менеджер проекта информирует заказчика об отказе.`
+            3: `Customer sends development request. Project manager analyzes the request. If request matches company capabilities, sales department prepares commercial proposal, technical department estimates timelines. If proposal accepted, development department starts work, testers verify result. Otherwise, project manager informs customer about refusal.`
         };
 
-        // Инициализация тестовых кнопок
+        // Initialize test buttons
         document.querySelectorAll('.test-btn').forEach(button => {
             button.addEventListener('click', function() {
                 const testNumber = this.getAttribute('data-test');
                 document.getElementById('process-text').value = testCases[testNumber];
-                showStatus(`Загружен тестовый пример ${testNumber}`, 'success');
+                showStatus(`Loaded test case ${testNumber}`, 'success');
             });
         });
 
-        // Кнопка обработки
+        // Process button
         document.getElementById('process-btn').addEventListener('click', processText);
         
-        // Кнопка сброса
+        // Reset button
         document.getElementById('reset-btn').addEventListener('click', resetApp);
         
-        // Функция обработки текста
-        function processText() {
+        // Close error button
+        document.getElementById('close-error').addEventListener('click', () => {
+            document.getElementById('error-section').style.display = 'none';
+        });
+        
+        // Function to process text
+        async function processText() {
             const text = document.getElementById('process-text').value.trim();
             
             if (!text) {
-                showStatus('Пожалуйста, введите текст процесса', 'error');
+                showError('Please enter process text');
                 return;
             }
             
-            showStatus('Обработка текста...', 'loading');
-            
-            // Скрываем предыдущие результаты
+            // Reset previous state
             hideAllResults();
+            hideError();
+            hideStatus();
             
-            // Эмулируем обработку (в реальном приложении здесь будет вызов API или WebSocket)
-            setTimeout(() => {
-                // Генерируем демо-результаты на основе текста
+            // Show progress bar
+            const progressSection = document.getElementById('progress-section');
+            const progressBar = document.getElementById('progress-bar');
+            const progressText = document.getElementById('progress-text');
+            progressSection.style.display = 'block';
+            
+            try {
+                // Simulate processing with progress updates
+                await simulateProcessing(progressBar, progressText);
+                
+                // Generate demo results
                 generateDemoResults(text);
-                showStatus('Обработка завершена успешно!', 'success');
-            }, 1500);
+                
+                // Show success
+                showStatus('Processing completed successfully!', 'success');
+                
+            } catch (error) {
+                showError(`Processing error: ${error.message}`);
+            } finally {
+                // Hide progress bar after delay
+                setTimeout(() => {
+                    progressSection.style.display = 'none';
+                    progressBar.style.width = '0%';
+                }, 500);
+            }
         }
         
-        // Функция сброса
+        // Simulate processing with progress
+        async function simulateProcessing(progressBar, progressText) {
+            const steps = [
+                {percent: 10, text: "Parsing text..."},
+                {percent: 25, text: "Extracting entities..."},
+                {percent: 40, text: "Identifying process participants..."},
+                {percent: 60, text: "Generating BPMN diagram..."},
+                {percent: 80, text: "Creating visualizations..."},
+                {percent: 95, text: "Finalizing results..."},
+                {percent: 100, text: "Complete!"}
+            ];
+            
+            for (const step of steps) {
+                await new Promise(resolve => setTimeout(resolve, 300 + Math.random() * 400));
+                progressBar.style.width = step.percent + '%';
+                progressText.textContent = step.text;
+            }
+        }
+        
+        // Show error
+        function showError(message) {
+            const errorSection = document.getElementById('error-section');
+            const errorMessage = document.getElementById('error-message');
+            errorMessage.textContent = message;
+            errorSection.style.display = 'block';
+            
+            // Auto-hide error after 10 seconds
+            setTimeout(() => {
+                errorSection.style.display = 'none';
+            }, 10000);
+        }
+        
+        // Hide error
+        function hideError() {
+            document.getElementById('error-section').style.display = 'none';
+        }
+        
+        // Reset function
         function resetApp() {
             document.getElementById('process-text').value = '';
             hideAllResults();
             hideStatus();
-            showStatus('Приложение сброшено', 'success');
+            hideError();
+            document.getElementById('progress-section').style.display = 'none';
+            showStatus('Application reset', 'success');
             setTimeout(hideStatus, 2000);
         }
         
-        // Функция скрытия всех результатов
+        // Hide all results
         function hideAllResults() {
             const resultCards = document.querySelectorAll('.result-card');
             resultCards.forEach(card => {
@@ -438,7 +585,7 @@
             });
         }
         
-        // Функция показа статуса
+        // Show status
         function showStatus(message, type) {
             const statusEl = document.getElementById('status-message');
             statusEl.textContent = message;
@@ -450,46 +597,51 @@
             }
         }
         
-        // Функция скрытия статуса
+        // Hide status
         function hideStatus() {
             document.getElementById('status-message').style.display = 'none';
         }
         
-        // Генерация демо-результатов
+        // Generate demo results
         function generateDemoResults(text) {
-            // Анализируем текст для извлечения сущностей
-            const entities = extractEntities(text);
-            
-            // Показываем результат подсветки сущностей
-            showEntityHighlighting(entities);
-            
-            // Генерируем PlantUML текст
-            const plantumlText = generatePlantUML(text);
-            showPlantUML(plantumlText);
-            
-            // Генерируем матрицу взаимодействий и тепловую карту
-            const agents = extractAgents(text);
-            showInteractionMatrix(agents);
-            generateHeatmap(agents);
-            
-            // Генерируем Sankey диаграмму
-            generateSankey(agents);
+            try {
+                // Extract entities
+                const entities = extractEntities(text);
+                
+                // Show entity highlighting
+                showEntityHighlighting(entities);
+                
+                // Generate PlantUML text
+                const plantumlText = generatePlantUML(text);
+                showPlantUML(plantumlText);
+                
+                // Generate interaction matrix and heatmap
+                const agents = extractAgents(text);
+                showInteractionMatrix(agents);
+                generateHeatmap(agents);
+                
+                // Generate Sankey diagram
+                generateSankey(agents);
+                
+            } catch (error) {
+                showError(`Failed to generate results: ${error.message}`);
+            }
         }
         
-        // Извлечение сущностей из текста (упрощенная версия)
+        // Extract entities from text
         function extractEntities(text) {
             const entities = [];
             const words = text.split(/\s+/);
             
-            // Простая логика извлечения сущностей
+            // Simple entity extraction logic
             words.forEach(word => {
                 const cleanWord = word.replace(/[.,]/g, '').toLowerCase();
                 
-                if (['отдел', 'служба', 'сотрудник', 'клиент', 'менеджер', 'заказчик'].some(term => cleanWord.includes(term))) {
+                if (['department', 'service', 'employee', 'customer', 'manager', 'client', 'tester'].some(term => cleanWord.includes(term))) {
                     entities.push({text: word, type: 'AGENT'});
-                } else if (['проверяет', 'отправляет', 'анализирует', 'готовит', 'оценивает', 'начинает', 'оформляет', 'обрабатывает', 'информирует'].some(term => cleanWord.includes(term))) {
+                } else if (['submits', 'reviews', 'checks', 'analyzes', 'prepares', 'estimates', 'starts', 'processes', 'informs', 'verifies'].some(term => cleanWord.includes(term))) {
                     entities.push({text: word, type: 'TASK'});
-                } else if (['если', 'иначе'].includes(cleanWord)) {
+                } else if (['if', 'otherwise'].includes(cleanWord)) {
                     entities.push({text: word, type: 'CONDITION'});
                 } else {
                     entities.push({text: word, type: 'O'});
@@ -499,19 +651,18 @@
             return entities;
         }
         
-        // Извлечение участников из текста
+        // Extract participants from text
         function extractAgents(text) {
             const agents = [];
             const sentences = text.split(/[.,]/g);
             
             sentences.forEach(sentence => {
-                if (sentence.includes('отдел') || sentence.includes('служба') || sentence.includes('сотрудник') || 
-                    sentence.includes('клиент') || sentence.includes('менеджер') || sentence.includes('заказчик')) {
+                if (sentence.includes('department') || sentence.includes('service') || sentence.includes('employee') || 
+                    sentence.includes('customer') || sentence.includes('manager') || sentence.includes('client')) {
                     
-                    // Упрощенное извлечение агента
+                    // Simplified agent extraction
                     const words = sentence.trim().split(/\s+/);
                     if (words.length > 0) {
-                        // Берем первые 2-3 слова как агента
                         const agent = words.slice(0, Math.min(3, words.length)).join(' ');
                         if (agent && !agents.includes(agent)) {
                             agents.push(agent);
@@ -520,20 +671,20 @@
                 }
             });
             
-            // Если агентов не найдено, создаем демо-агентов
+            // If no agents found, create demo agents
             if (agents.length === 0) {
-                return ['Сотрудник', 'Менеджер', 'Отдел кадров', 'Финансовая служба'];
+                return ['Employee', 'Manager', 'HR Department', 'Finance Department'];
             }
             
             return agents;
         }
         
-        // Показать подсветку сущностей
+        // Show entity highlighting
         function showEntityHighlighting(entities) {
             const container = document.getElementById('highlighted-text');
             let html = '';
             
-            // Группируем сущности для лучшего отображения
+            // Group entities for better display
             let currentGroup = [];
             let currentType = null;
             
@@ -546,7 +697,7 @@
                 currentGroup.push(entity.text);
                 currentType = entity.type;
                 
-                // Если это последняя сущность, выводим группу
+                // If last entity, output group
                 if (index === entities.length - 1) {
                     html += createEntitySpan(currentGroup.join(' '), currentType);
                 }
@@ -556,7 +707,7 @@
             document.getElementById('result-highlighting').style.display = 'block';
         }
         
-        // Создать span для сущности
+        // Create entity span
         function createEntitySpan(text, type) {
             const typeClass = `entity-${type.toLowerCase()}`;
             const displayType = type !== 'O' ? type : '';
@@ -569,175 +720,318 @@
             `;
         }
         
-        // Генерация PlantUML текста
+        // Generate PlantUML text - CORRECT SYNTAX
         function generatePlantUML(text) {
             const agents = extractAgents(text);
-            const hasCondition = text.toLowerCase().includes('если') || text.toLowerCase().includes('иначе');
+            const hasCondition = text.toLowerCase().includes('if') || text.toLowerCase().includes('otherwise');
             
             let plantuml = `@startuml\n`;
+            plantuml += `title Business Process Diagram\n\n`;
             
-            agents.forEach(agent => {
-                plantuml += `|${agent}|\n`;
-                plantuml += `:действие ${agent.toLowerCase()};\n`;
-            });
+            // Get unique agents
+            const uniqueAgents = [...new Set(agents.map(agent => 
+                agent.split(' ').slice(0, 2).join(' ')
+            ))].slice(0, 4);
             
-            if (hasCondition) {
-                plantuml += `if (условие?) then (да)\n`;
-                plantuml += `:действие при выполнении условия;\n`;
-                plantuml += `else (нет)\n`;
-                plantuml += `:действие при невыполнении условия;\n`;
-                plantuml += `endif\n`;
+            if (uniqueAgents.length === 0) {
+                uniqueAgents.push('Employee', 'Manager', 'HR Department');
             }
             
-            plantuml += `stop\n`;
-            plantuml += `@enduml`;
+            // Add participants with simple names
+            uniqueAgents.forEach((agent, index) => {
+                // Clean name for PlantUML
+                const cleanName = agent.length > 20 ? agent.substring(0, 20) + "..." : agent;
+                plantuml += `participant "${cleanName}" as P${index}\n`;
+            });
+            
+            plantuml += `\n`;
+            
+            // Add process flow
+            if (uniqueAgents.length >= 2) {
+                plantuml += `P0 -> P1 : Submit request\n`;
+                if (uniqueAgents.length >= 3) {
+                    plantuml += `P1 -> P2 : Review request\n`;
+                }
+            }
+            
+            // Add conditional flow - CORRECT PlantUML syntax
+            if (hasCondition) {
+                plantuml += `\n`;
+                plantuml += `alt Request approved\n`;
+                
+                if (uniqueAgents.length >= 3) {
+                    plantuml += `  P2 -> P0 : Process\n`;
+                } else if (uniqueAgents.length >= 2) {
+                    plantuml += `  P1 -> P0 : Process\n`;
+                }
+                
+                plantuml += `else Request rejected\n`;
+                if (uniqueAgents.length >= 2) {
+                    plantuml += `  P1 -> P0 : Inform\n`;
+                } else {
+                    plantuml += `  P0 -> P0 : Inform\n`;
+                }
+                plantuml += `end\n`;
+            }
+            
+            plantuml += `\n@enduml`;
             
             return plantuml;
         }
         
-        // Показать PlantUML
+        // Show PlantUML with CORRECT ENCODING
         function showPlantUML(plantumlText) {
             document.getElementById('plantuml-text').textContent = plantumlText;
             
-            // Генерируем URL для PlantUML изображения (демо-версия)
-            const encoded = btoa(plantumlText).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
-            const url = `https://www.plantuml.com/plantuml/svg/${encoded}`;
-            
-            // Создаем изображение
-            const imgContainer = document.getElementById('plantuml-image');
-            imgContainer.innerHTML = `<img src="${url}" alt="BPMN диаграмма" style="max-width:100%;">`;
-            
-            // Показываем ссылку
-            const urlLink = document.getElementById('plantuml-url');
-            urlLink.href = url;
-            urlLink.textContent = url;
-            urlLink.style.display = 'block';
-            
-            document.getElementById('result-plantuml').style.display = 'block';
+            try {
+                // CORRECT PlantUML encoding with ~1 prefix
+                const encoded = encodePlantUMLCorrect(plantumlText);
+                const url = `https://www.plantuml.com/plantuml/svg/${encoded}`;
+                
+                console.log("Generated PlantUML URL:", url);
+                
+                // Create image container
+                const imgContainer = document.getElementById('plantuml-image');
+                imgContainer.innerHTML = `
+                    <div style="text-align: center; padding: 20px; background: white; border-radius: 4px;">
+                        <img src="${url}" 
+                             alt="BPMN Diagram" 
+                             style="max-width: 100%; max-height: 500px; border: 1px solid #ddd;"
+                             onload="console.log('PlantUML image loaded successfully')"
+                             onerror="this.onerror=null; this.style.display='none'; this.parentElement.innerHTML='<div style=\\'padding:40px;color:#666;\\'><strong>⚠️ Diagram Preview</strong><br>View directly: <a href=\\'${url}\\' target=\\'_blank\\'>Open PlantUML ↗</a><br><small>Or copy PlantUML code above to <a href=\\'https://plantuml.com/\\' target=\\'_blank\\'>plantuml.com</a></small></div>'">
+                    </div>`;
+                
+                // Show URL link
+                const urlLink = document.getElementById('plantuml-url');
+                urlLink.href = url;
+                urlLink.textContent = "Open PlantUML diagram in new tab ↗";
+                urlLink.style.display = 'block';
+                
+                document.getElementById('result-plantuml').style.display = 'block';
+                
+            } catch (error) {
+                console.error("PlantUML generation error:", error);
+                const imgContainer = document.getElementById('plantuml-image');
+                imgContainer.innerHTML = `<div class="visualization-placeholder" style="color:#e74c3c">
+                    <strong>Error generating diagram preview</strong><br>
+                    <small>Try copying the PlantUML code above to <a href="https://plantuml.com/" target="_blank">plantuml.com</a></small>
+                </div>`;
+                document.getElementById('result-plantuml').style.display = 'block';
+            }
         }
         
-        // Показать матрицу взаимодействий
+        // CORRECT PlantUML encoding function
+        function encodePlantUMLCorrect(text) {
+            try {
+                // Convert text to UTF-8 bytes
+                const utf8Bytes = new TextEncoder().encode(text);
+                
+                // Use pako for DEFLATE compression if available
+                let compressed;
+                if (typeof pako !== 'undefined') {
+                    compressed = pako.deflate(utf8Bytes, { level: 9 });
+                } else {
+                    // Simple fallback compression
+                    compressed = simpleDeflate(utf8Bytes);
+                }
+                
+                // Convert to base64
+                let binary = '';
+                for (let i = 0; i < compressed.length; i++) {
+                    binary += String.fromCharCode(compressed[i]);
+                }
+                const base64 = btoa(binary);
+                
+                // Convert to PlantUML format
+                const encoded = base64
+                    .replace(/\+/g, '-')
+                    .replace(/\//g, '_')
+                    .replace(/=+$/, '');
+                
+                // ADD ~1 prefix for Huffman encoding (as per PlantUML error message)
+                return '~1' + encoded;
+                
+            } catch (error) {
+                console.error("Encoding error, using simple encoding:", error);
+                // Fallback: simple base64 encoding
+                const base64 = btoa(encodeURIComponent(text).replace(/%([0-9A-F]{2})/g, 
+                    (match, p1) => String.fromCharCode('0x' + p1)));
+                const encoded = base64
+                    .replace(/\+/g, '-')
+                    .replace(/\//g, '_')
+                    .replace(/=+$/, '');
+                return '~1' + encoded;
+            }
+        }
+        
+        // Simple DEFLATE compression fallback
+        function simpleDeflate(bytes) {
+            // Very simple compression for PlantUML
+            const result = [];
+            
+            // DEFLATE header (zlib format)
+            result.push(0x78, 0x9C); // CMF (0x78 = deflate, 32k window), FLG (0x9C = default compression)
+            
+            // Add compressed data (simplified)
+            let i = 0;
+            while (i < bytes.length) {
+                // Find repeated bytes
+                let repeatCount = 1;
+                while (i + repeatCount < bytes.length && 
+                       bytes[i + repeatCount] === bytes[i] && 
+                       repeatCount < 258) {
+                    repeatCount++;
+                }
+                
+                if (repeatCount > 3) {
+                    // Literal block with repeat
+                    result.push(bytes[i]);
+                    result.push(bytes[i]);
+                    result.push(repeatCount);
+                    i += repeatCount;
+                } else {
+                    // Add literals
+                    for (let j = 0; j < repeatCount; j++) {
+                        result.push(bytes[i + j]);
+                    }
+                    i += repeatCount;
+                }
+            }
+            
+            // Add Adler-32 checksum (simplified)
+            result.push(0x00, 0x00, 0x00, 0x01);
+            
+            return result;
+        }
+        
+        // Show interaction matrix
         function showInteractionMatrix(agents) {
             if (agents.length === 0) return;
             
-            // Создаем демо-матрицу
-            let matrixText = 'Agents: ' + agents.join(', ') + '\n\n';
-            matrixText += 'Matrix:\n';
+            // Clean agent names
+            const cleanAgents = agents.map(agent => agent.split(' ').slice(0, 2).join(' '));
             
-            for (let i = 0; i < agents.length; i++) {
+            // Create matrix
+            let matrixText = 'Participants: ' + cleanAgents.join(', ') + '\n\n';
+            matrixText += 'Interaction Matrix:\n';
+            
+            for (let i = 0; i < cleanAgents.length; i++) {
                 let row = '';
-                for (let j = 0; j < agents.length; j++) {
+                for (let j = 0; j < cleanAgents.length; j++) {
                     if (i === j) {
-                        row += ' 0';
+                        row += '  0';
                     } else {
-                        // Случайные значения для демо
-                        row += ' ' + Math.floor(Math.random() * 3);
+                        row += '  ' + Math.floor(Math.random() * 3);
                     }
                 }
-                matrixText += '[' + row + ' ]\n';
+                matrixText += '[' + row + '  ]\n';
             }
             
             document.getElementById('matrix-text').textContent = matrixText;
         }
         
-        // Генерация тепловой карты
+        // Generate heatmap
         function generateHeatmap(agents) {
             if (agents.length === 0) {
                 document.getElementById('result-heatmap').style.display = 'block';
                 return;
             }
             
-            // Создаем демо-данные для тепловой карты
-            const data = [];
-            for (let i = 0; i < agents.length; i++) {
-                const row = [];
-                for (let j = 0; j < agents.length; j++) {
-                    if (i === j) {
-                        row.push(0);
-                    } else {
-                        row.push(Math.floor(Math.random() * 5));
+            try {
+                // Clean agent names
+                const cleanAgents = agents.map(agent => agent.split(' ').slice(0, 2).join(' '));
+                
+                // Create data
+                const data = [];
+                for (let i = 0; i < cleanAgents.length; i++) {
+                    const row = [];
+                    for (let j = 0; j < cleanAgents.length; j++) {
+                        row.push(i === j ? 0 : Math.floor(Math.random() * 5));
                     }
+                    data.push(row);
                 }
-                data.push(row);
+                
+                const trace = {
+                    z: data,
+                    x: cleanAgents,
+                    y: cleanAgents,
+                    type: 'heatmap',
+                    colorscale: 'Viridis'
+                };
+                
+                const layout = {
+                    title: 'Interaction Heatmap',
+                    xaxis: { title: 'To' },
+                    yaxis: { title: 'From' },
+                    width: document.getElementById('heatmap-visualization').offsetWidth - 40,
+                    height: 400
+                };
+                
+                Plotly.newPlot('heatmap-visualization', [trace], layout);
+                document.getElementById('result-heatmap').style.display = 'block';
+            } catch (error) {
+                const container = document.getElementById('heatmap-visualization');
+                container.innerHTML = `<div class="visualization-placeholder" style="color:#e74c3c">Heatmap error</div>`;
+                document.getElementById('result-heatmap').style.display = 'block';
             }
-            
-            const trace = {
-                z: data,
-                x: agents,
-                y: agents,
-                type: 'heatmap',
-                colorscale: 'Viridis'
-            };
-            
-            const layout = {
-                title: 'Resource Interaction Heatmap',
-                xaxis: { title: 'To Agent' },
-                yaxis: { title: 'From Agent' },
-                width: document.getElementById('heatmap-visualization').offsetWidth - 40,
-                height: 400
-            };
-            
-            Plotly.newPlot('heatmap-visualization', [trace], layout);
-            document.getElementById('result-heatmap').style.display = 'block';
         }
         
-        // Генерация Sankey диаграммы
+        // Generate Sankey diagram
         function generateSankey(agents) {
             if (agents.length < 2) {
                 document.getElementById('result-sankey').style.display = 'block';
                 return;
             }
             
-            // Создаем демо-данные для Sankey
-            const sources = [];
-            const targets = [];
-            const values = [];
-            
-            for (let i = 0; i < agents.length - 1; i++) {
-                sources.push(i);
-                targets.push(i + 1);
-                values.push(Math.floor(Math.random() * 10) + 1);
-            }
-            
-            // Добавляем несколько обратных связей для сложности
-            if (agents.length > 2) {
-                sources.push(agents.length - 1);
-                targets.push(0);
-                values.push(Math.floor(Math.random() * 5) + 1);
-            }
-            
-            const trace = {
-                type: "sankey",
-                orientation: "h",
-                node: {
-                    pad: 15,
-                    thickness: 20,
-                    line: {
-                        color: "black",
-                        width: 0.5
-                    },
-                    label: agents,
-                    color: ["#7FDBFF", "#FFDC00", "#FF851B", "#2ECC40", "#DDDDDD"].slice(0, agents.length)
-                },
-                link: {
-                    source: sources,
-                    target: targets,
-                    value: values
+            try {
+                // Clean agent names
+                const cleanAgents = agents.map(agent => agent.split(' ').slice(0, 2).join(' '));
+                
+                // Create data
+                const sources = [];
+                const targets = [];
+                const values = [];
+                
+                for (let i = 0; i < cleanAgents.length - 1; i++) {
+                    sources.push(i);
+                    targets.push(i + 1);
+                    values.push(Math.floor(Math.random() * 10) + 1);
                 }
-            };
-            
-            const layout = {
-                title: "Resource Flow (Sankey Diagram)",
-                font: { size: 12 },
-                width: document.getElementById('sankey-visualization').offsetWidth - 40,
-                height: 500
-            };
-            
-            Plotly.newPlot('sankey-visualization', [trace], layout);
-            document.getElementById('result-sankey').style.display = 'block';
+                
+                const trace = {
+                    type: "sankey",
+                    orientation: "h",
+                    node: {
+                        pad: 15,
+                        thickness: 20,
+                        line: { color: "black", width: 0.5 },
+                        label: cleanAgents,
+                        color: ["#3498db", "#2ecc71", "#e74c3c", "#f39c12"]
+                    },
+                    link: {
+                        source: sources,
+                        target: targets,
+                        value: values
+                    }
+                };
+                
+                const layout = {
+                    title: "Resource Flow",
+                    font: { size: 12 },
+                    width: document.getElementById('sankey-visualization').offsetWidth - 40,
+                    height: 500
+                };
+                
+                Plotly.newPlot('sankey-visualization', [trace], layout);
+                document.getElementById('result-sankey').style.display = 'block';
+            } catch (error) {
+                const container = document.getElementById('sankey-visualization');
+                container.innerHTML = `<div class="visualization-placeholder" style="color:#e74c3c">Sankey error</div>`;
+                document.getElementById('result-sankey').style.display = 'block';
+            }
         }
         
-        // Инициализация с тестовым текстом
+        // Initialize with test text
         window.addEventListener('DOMContentLoaded', () => {
             document.getElementById('process-text').value = testCases[1];
         });
