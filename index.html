@@ -1505,74 +1505,39 @@ Example: Employee submits a vacation request. Manager reviews the request. If ap
         }
         
         // CORRECT PlantUML encoding function
-        function encodePlantUMLCorrect(text) {
-            try {
-                // Convert text to UTF-8 bytes
-                const utf8Bytes = new TextEncoder().encode(text);
-                
-                // Use pako for DEFLATE compression
-                let compressed;
-                if (typeof pako !== 'undefined') {
-                    compressed = pako.deflate(utf8Bytes, { level: 9 });
-                } else {
-                    // Simple fallback compression
-                    compressed = simpleDeflate(utf8Bytes);
-                }
-                
-                // Convert to base64
-                let binary = '';
-                for (let i = 0; i < compressed.length; i++) {
-                    binary += String.fromCharCode(compressed[i]);
-                }
-                const base64 = btoa(binary);
-                
-                // Convert to PlantUML format
-                const encoded = base64
-                    .replace(/\+/g, '-')
-                    .replace(/\//g, '_')
-                    .replace(/=+$/, '');
-                
-                // Add ~1 prefix for Huffman encoding
-                return '~1' + encoded;
-                
-            } catch (error) {
-                console.error("Encoding error:", error);
-                // Fallback: simple base64 encoding
-                const base64 = btoa(encodeURIComponent(text).replace(/%([0-9A-F]{2})/g, 
-                    (match, p1) => String.fromCharCode('0x' + p1)));
-                const encoded = base64
-                    .replace(/\+/g, '-')
-                    .replace(/\//g, '_')
-                    .replace(/=+$/, '');
-                return '~1' + encoded;
+
+        function encodePlantUML(text) {
+            const utf8 = new TextEncoder().encode(text);
+            const compressed = pako.deflateRaw(utf8, { level: 9 });
+            
+            function encode6bit(b) {
+                if (b < 10) return String.fromCharCode(48 + b);
+                b -= 10;
+                if (b < 26) return String.fromCharCode(65 + b);
+                b -= 26;
+                if (b < 26) return String.fromCharCode(97 + b);
+                b -= 26;
+                return b === 0 ? '-' : '_';
             }
-        }
-        
-        // Simple DEFLATE compression fallback
-        function simpleDeflate(bytes) {
-            const result = [];
-            // Simple compression for PlantUML
-            let i = 0;
-            while (i < bytes.length) {
-                let repeatCount = 1;
-                while (i + repeatCount < bytes.length && 
-                       bytes[i + repeatCount] === bytes[i] && 
-                       repeatCount < 258) {
-                    repeatCount++;
-                }
-                
-                if (repeatCount > 3) {
-                    result.push(bytes[i], bytes[i], repeatCount);
-                    i += repeatCount;
-                } else {
-                    for (let j = 0; j < repeatCount; j++) {
-                        result.push(bytes[i + j]);
-                    }
-                    i += repeatCount;
-                }
+            
+            function append3bytes(b1, b2, b3) {
+                const c1 = b1 >> 2;
+                const c2 = ((b1 & 0x3) << 4) | (b2 >> 4);
+                const c3 = ((b2 & 0xF) << 2) | (b3 >> 6);
+                const c4 = b3 & 0x3F;
+                return encode6bit(c1) + encode6bit(c2) + encode6bit(c3) + encode6bit(c4);
+            }
+            
+            let result = "";
+            for (let i = 0; i < compressed.length; i += 3) {
+                const b1 = compressed[i];
+                const b2 = i + 1 < compressed.length ? compressed[i + 1] : 0;
+                const b3 = i + 2 < compressed.length ? compressed[i + 2] : 0;
+                result += append3bytes(b1, b2, b3);
             }
             return result;
         }
+
         
         // Show interaction matrix
         function showInteractionMatrix(agents) {
@@ -1841,3 +1806,4 @@ Example: Employee submits a vacation request. Manager reviews the request. If ap
     </script>
 </body>
 </html>
+
