@@ -1255,31 +1255,38 @@ Example: Employee submits a vacation request. Manager reviews the request. If ap
         }
         
         // Generate demo results
+        // Generate demo results
         function generateDemoResults(text) {
             try {
-                // Extract entities
+                // 1. Извлекаем токены-сущности
                 const entities = extractEntities(text);
-                
-                // Show entity highlighting
+        
+                // 2. Группируем их в осмысленные фразы по типам
+                const grouped = groupEntities(entities);
+        
+                // 3. Подсветка в тексте — как и было
                 showEntityHighlighting(entities);
-                
-                // Generate PlantUML text
-                const plantumlText = generatePlantUML(text);
+        
+                // 4. PlantUML теперь строится по сгруппированным сущностям
+                const plantumlText = generatePlantUMLFromEntities(grouped, text);
                 showPlantUML(plantumlText);
-                
-                // Generate interaction matrix and heatmap
-                const agents = extractAgents(text);
+        
+                // 5. Участники для матриц/диаграмм — сначала берём AGENT из сущностей,
+                //    если вдруг их нет — откатываемся к старому extractAgents
+                let agents = grouped.AGENT && grouped.AGENT.length > 0
+                    ? grouped.AGENT
+                    : extractAgents(text);
+        
                 showInteractionMatrix(agents);
                 generateHeatmap(agents);
-                
-                // Generate Sankey diagram
                 generateSankey(agents);
-                
+        
             } catch (error) {
                 showError(`❌ Failed to generate results: ${error.message}`);
                 console.error('Generation error:', error);
             }
         }
+
         
         // Extract entities from text
         function extractEntities(text) {
@@ -1303,7 +1310,51 @@ Example: Employee submits a vacation request. Manager reviews the request. If ap
             
             return entities;
         }
+           // Группируем сущности по типам и склеиваем соседние слова одного типа в фразы
+        function groupEntities(entities) {
+            const groups = {
+                AGENT: [],
+                TASK: [],
+                CONDITION: []
+            };
+            
+            let current = [];
+            let currentType = null;
         
+            function flush() {
+                if (!currentType || current.length === 0) return;
+                let phrase = current.join(' ').replace(/[.,]/g, '').trim();
+                if (phrase && !groups[currentType].includes(phrase)) {
+                    groups[currentType].push(phrase);
+                }
+                current = [];
+                currentType = null;
+            }
+        
+            entities.forEach((e, idx) => {
+                // Всё, что не является помеченной сущностью (O), разрывает группу
+                if (e.type === 'O') {
+                    flush();
+                    return;
+                }
+        
+                // Если тип сменился — сбрасываем предыдущую группу
+                if (e.type !== currentType && current.length) {
+                    flush();
+                }
+        
+                currentType = e.type;
+                current.push(e.text);
+        
+                // В конце массива обязательно сбрасываем последнюю группу
+                if (idx === entities.length - 1) {
+                    flush();
+                }
+            });
+        
+            return groups;
+        }
+ 
         // Extract participants from text
         function extractAgents(text) {
             const agents = [];
@@ -1374,7 +1425,107 @@ Example: Employee submits a vacation request. Manager reviews the request. If ap
                 </span>
             `;
         }
-        
+        // Экранируем текст для PlantUML (минимально)
+function escapePlantUMLLabel(label) {
+    return label.replace(/"/g, '\\"');
+}
+
+// Генерация PlantUML-диаграммы по сгруппированным сущностям
+function generatePlantUMLFromEntities(grouped, originalText) {
+    const agentsRaw = grouped.AGENT || [];
+    const tasksRaw = grouped.TASK || [];
+    const hasCondition = (grouped.CONDITION && grouped.CONDITION.length > 0) ||
+        originalText.toLowerCase().includes('if') ||
+        originalText.toLowerCase().includes('otherwise');
+
+    // Участники — уникальные AGENT-фразы, максимум 6
+    let uniqueAgents = [...new Set(
+        agentsRaw.map(a => a.trim()).filter(a => a.length > 0)
+    )].slice(0, 6);
+
+    // Если агентов не нашли — используем демо-набор
+    if (uniqueAgents.length === 0) {
+        uniqueAgents = ['Employee', 'Manager', 'HR Department', 'Finance', 'Support', 'System'];
+    }
+
+    // Обрезаем слишком длинные подписи
+    const cleanAgents = uniqueAgents.map(a =>
+        a.length > 30 ? a.substring(0, 30) + '...' : a
+    );
+
+    // Задачи — последовательность TASK-фраз в порядке появления
+    const tasks = tasksRaw.map(t => t.trim()).filter(t => t.length > 0);
+
+    let plantuml = `@startuml\n`;
+    plantuml += `!theme plain\n`;
+    plantuml += `skinparam backgroundColor #FFFFFF\n`;
+    plantuml += `skinparam sequence {\n`;
+    plantuml += `  ArrowColor #667eea\n`;
+    plantuml += `  ActorBorderColor #000000\n`;
+    plantuml += `  ActorBackgroundColor #E1F5FE\n`;
+    plantuml += `  ParticipantBorderColor #667eea\n`;
+    plantuml += `  ParticipantBackgroundColor #F8F9FF\n`;
+    plantuml += `  LifeLineBorderColor #667eea\n`;
+    plantuml += `  LifeLineBackgroundColor #FFFFFF\n`;
+    plantuml += `  ParticipantFontSize 16\n`;
+    plantuml += `  ActorFontSize 16\n`;
+    plantuml += `}\n\n`;
+
+    plantuml += `title **<color:#667eea>UML Sequence Diagram</color>**\n`;
+    plantuml += `caption Generated from: "${escapePlantUMLLabel(originalText.substring(0, 100))}${originalText.length > 100 ? '...' : ''}"\n\n`;
+
+    // Объявляем участников
+    cleanAgents.forEach((agent, idx) => {
+        plantuml += `participant "<color:#667eea><b>${escapePlantUMLLabel(agent)}</b></color>" as P${idx}\n`;
+    });
+    plantuml += `\n`;
+
+    const nAgents = cleanAgents.length;
+
+    // Если есть хотя бы 2 участника — строим последовательность задач между ними
+    if (nAgents >= 2 && tasks.length > 0) {
+        tasks.forEach((taskText, i) => {
+            const from = i % nAgents;
+            const to = (i + 1) % nAgents;
+            const label = escapePlantUMLLabel(taskText);
+
+            plantuml += `P${from} -> P${to} : **<color:#00b09b>${label}</color>**\n`;
+            plantuml += `activate P${to}\n`;
+        });
+    } else if (nAgents >= 2) {
+        // Если задач не нашли — хотя бы один базовый вызов
+        plantuml += `P0 -> P1 : **<color:#00b09b>Process</color>**\n`;
+        plantuml += `activate P1\n`;
+    }
+
+    // Ветвление по условиям
+    if (hasCondition) {
+        plantuml += `\n`;
+        const condLabel = grouped.CONDITION && grouped.CONDITION[0]
+            ? escapePlantUMLLabel(grouped.CONDITION[0])
+            : 'Condition';
+
+        plantuml += `alt **<color:#667eea>${condLabel} / approved</color>**\n`;
+        if (nAgents >= 2) {
+            plantuml += `  P1 -> P0 : **<color:#96c93d>Positive path</color>**\n`;
+        } else {
+            plantuml += `  P0 -> P0 : **<color:#96c93d>Positive path</color>**\n`;
+        }
+
+        plantuml += `else **<color:#ff416c>${condLabel} / rejected</color>**\n`;
+        if (nAgents >= 2) {
+            plantuml += `  P1 -> P0 : **<color:#ff416c>Negative path</color>**\n`;
+        } else {
+            plantuml += `  P0 -> P0 : **<color:#ff416c>Negative path</color>**\n`;
+        }
+        plantuml += `end\n`;
+    }
+
+    plantuml += `\n@enduml`;
+
+    return plantuml;
+}
+
         // Generate PlantUML text
         function generatePlantUML(text) {
             const agents = extractAgents(text);
@@ -1789,5 +1940,6 @@ Example: Employee submits a vacation request. Manager reviews the request. If ap
     </script>
 </body>
 </html>
+
 
 
