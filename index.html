@@ -1004,1132 +1004,944 @@ Example: Employee submits a vacation request. Manager reviews the request. If ap
         <div class="fullscreen-content" id="fullscreen-content"></div>
     </div>
 
-    <script>
-        // Test data in English
-        const testCases = {
-            1: `Employee submits a vacation request. Manager reviews the request. If approved, HR department processes the vacation. Otherwise, manager informs the employee.`,
+   <script>
+    // Test data in English
+    const testCases = {
+        1: `Employee submits a vacation request. Manager reviews the request. If approved, HR department processes the vacation. Otherwise, manager informs the employee.`,
+        
+        2: `Customer submits a product return request. Support service checks the request. If product meets return conditions, finance department approves refund, system processes payment. Otherwise, support service informs customer about rejection.`,
+        
+        3: `Customer sends development request. Project manager analyzes the request. If request matches company capabilities, sales department prepares commercial proposal, technical department estimates timelines. If proposal accepted, development department starts work, testers verify result. Otherwise, project manager informs customer about refusal.`
+    };
+
+    // Initialize test buttons
+    document.querySelectorAll('.test-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const testNumber = this.getAttribute('data-test');
+            document.getElementById('process-text').value = testCases[testNumber];
+            showStatus(`Loaded test case ${testNumber}`, 'success');
+            // Animate button
+            this.style.transform = 'scale(0.95)';
+            setTimeout(() => {
+                this.style.transform = '';
+            }, 150);
+        });
+    });
+
+    // Process button
+    document.getElementById('process-btn').addEventListener('click', processText);
+    
+    // Reset button
+    document.getElementById('reset-btn').addEventListener('click', resetApp);
+    
+    // Close error button
+    document.getElementById('close-error').addEventListener('click', () => {
+        document.getElementById('error-section').style.display = 'none';
+    });
+    
+    // Fullscreen functions
+    function toggleFullscreen(elementId) {
+        const element = document.getElementById(elementId);
+        const overlay = document.getElementById('fullscreen-overlay');
+        const content = document.getElementById('fullscreen-content');
+        
+        content.innerHTML = element.innerHTML;
+        
+        // Adjust for fullscreen
+        const images = content.querySelectorAll('img');
+        images.forEach(img => {
+            img.style.maxWidth = '100%';
+            img.style.maxHeight = '90vh';
+            img.style.objectFit = 'contain';
+        });
+        
+        overlay.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+        
+        // Also show Plotly figures in fullscreen
+        if (elementId === 'heatmap-visualization' || elementId === 'sankey-visualization') {
+            setTimeout(() => {
+                Plotly.Plots.resize(content);
+            }, 100);
+        }
+    }
+    
+    function closeFullscreen() {
+        const overlay = document.getElementById('fullscreen-overlay');
+        overlay.style.display = 'none';
+        document.body.style.overflow = 'auto';
+    }
+    
+    // Download functions
+    function downloadPlantUML() {
+        const url = document.getElementById('plantuml-url').href;
+        if (url && url !== '#') {
+            window.open(url, '_blank');
+        }
+    }
+    
+    function downloadHeatmap() {
+        const plotDiv = document.getElementById('heatmap-visualization');
+        if (plotDiv && plotDiv.querySelector('.plotly')) {
+            Plotly.downloadImage(plotDiv, {
+                format: 'png',
+                height: 1200,
+                width: 1600,
+                filename: 'uml-heatmap'
+            });
+        }
+    }
+    
+    function downloadSankey() {
+        const plotDiv = document.getElementById('sankey-visualization');
+        if (plotDiv && plotDiv.querySelector('.plotly')) {
+            Plotly.downloadImage(plotDiv, {
+                format: 'png',
+                height: 1200,
+                width: 1600,
+                filename: 'uml-sankey'
+            });
+        }
+    }
+    
+    // Refresh PlantUML
+    function refreshPlantUML() {
+        const plantumlText = document.getElementById('plantuml-text').textContent;
+        if (plantumlText) {
+            showPlantUML(plantumlText);
+            showStatus('Diagram refreshed', 'success');
+        }
+    }
+    
+    // Function to process text
+    async function processText() {
+        const text = document.getElementById('process-text').value.trim();
+        
+        if (!text) {
+            showError('Please enter process text');
+            return;
+        }
+        
+        // Reset previous state
+        hideAllResults();
+        hideError();
+        hideStatus();
+        
+        // Show progress bar
+        const progressSection = document.getElementById('progress-section');
+        const progressBar = document.getElementById('progress-bar');
+        const progressText = document.getElementById('progress-text');
+        progressSection.style.display = 'block';
+        
+        try {
+            // Simulate processing with progress updates
+            await simulateProcessing(progressBar, progressText);
             
-            2: `Customer submits a product return request. Support service checks the request. If product meets return conditions, finance department approves refund, system processes payment. Otherwise, support service informs customer about rejection.`,
+            // Generate results
+            generateDemoResults(text);
             
-            3: `Customer sends development request. Project manager analyzes the request. If request matches company capabilities, sales department prepares commercial proposal, technical department estimates timelines. If proposal accepted, development department starts work, testers verify result. Otherwise, project manager informs customer about refusal.`
+            // Show success
+            showStatus('✅ Processing completed successfully! Visualizations are ready.', 'success');
+            
+            // Scroll to results
+            setTimeout(() => {
+                document.querySelector('.results-section').scrollIntoView({ 
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            }, 500);
+            
+        } catch (error) {
+            showError(`❌ Processing error: ${error.message}`);
+        } finally {
+            // Hide progress bar after delay
+            setTimeout(() => {
+                progressSection.style.display = 'none';
+                progressBar.style.width = '0%';
+            }, 500);
+        }
+    }
+    
+    // Simulate processing with progress
+    async function simulateProcessing(progressBar, progressText) {
+        const steps = [
+            {percent: 10, text: "📖 Parsing text structure..."},
+            {percent: 25, text: "🔍 Extracting entities and participants..."},
+            {percent: 40, text: "👥 Identifying process relationships..."},
+            {percent: 55, text: "📊 Generating UML diagram..."},
+            {percent: 70, text: "🔥 Creating interaction heatmap..."},
+            {percent: 85, text: "🌊 Generating Sankey flow diagram..."},
+            {percent: 95, text: "🎨 Finalizing visualizations..."},
+            {percent: 100, text: "✅ Complete! Rendering results..."}
+        ];
+        
+        for (const step of steps) {
+            await new Promise(resolve => setTimeout(resolve, 500 + Math.random() * 400));
+            progressBar.style.width = step.percent + '%';
+            progressText.textContent = step.text;
+        }
+    }
+    
+    // Show error
+    function showError(message) {
+        const errorSection = document.getElementById('error-section');
+        const errorMessage = document.getElementById('error-message');
+        errorMessage.textContent = message;
+        errorSection.style.display = 'block';
+        
+        // Scroll to error
+        errorSection.scrollIntoView({ 
+            behavior: 'smooth',
+            block: 'center'
+        });
+        
+        // Auto-hide error after 15 seconds
+        setTimeout(() => {
+            errorSection.style.display = 'none';
+        }, 15000);
+    }
+    
+    // Hide error
+    function hideError() {
+        document.getElementById('error-section').style.display = 'none';
+    }
+    
+    // Reset function
+    function resetApp() {
+        document.getElementById('process-text').value = '';
+        hideAllResults();
+        hideStatus();
+        hideError();
+        document.getElementById('progress-section').style.display = 'none';
+        showStatus('🔄 Application reset. Ready for new input.', 'success');
+        setTimeout(hideStatus, 2000);
+        
+        // Scroll to top
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+    
+    // Hide all results
+    function hideAllResults() {
+        const resultCards = document.querySelectorAll('.result-card');
+        resultCards.forEach(card => {
+            card.style.display = 'none';
+        });
+    }
+    
+    // Show status
+    function showStatus(message, type) {
+        const statusEl = document.getElementById('status-message');
+        statusEl.innerHTML = message;
+        statusEl.className = `status-message status-${type}`;
+        statusEl.style.display = 'block';
+        
+        if (type === 'loading') {
+            statusEl.innerHTML = `<span class="loading-spinner"></span> ${message}`;
+        }
+        
+        // Auto-hide success messages
+        if (type === 'success') {
+            setTimeout(() => {
+                if (statusEl.className.includes('status-success')) {
+                    hideStatus();
+                }
+            }, 5000);
+        }
+    }
+    
+    // Hide status
+    function hideStatus() {
+        document.getElementById('status-message').style.display = 'none';
+    }
+
+    // --------------------------
+    // NLP / сущности / ветвление
+    // --------------------------
+
+    // Extract entities from text
+    function extractEntities(text) {
+        const entities = [];
+        const words = text.split(/\s+/);
+        
+        words.forEach(word => {
+            const cleanWord = word.replace(/[.,]/g, '').toLowerCase();
+            
+            if (['department', 'service', 'employee', 'customer', 'manager', 'client', 'tester', 'project', 'team', 'system'].some(term => cleanWord.includes(term))) {
+                entities.push({text: word, type: 'AGENT'});
+            } else if (['submits', 'reviews', 'checks', 'analyzes', 'prepares', 'estimates', 'starts', 'processes', 'informs', 'verifies', 'sends', 'approves', 'accepts'].some(term => cleanWord.includes(term))) {
+                entities.push({text: word, type: 'TASK'});
+            } else if (['if', 'otherwise', 'when', 'then'].includes(cleanWord)) {
+                entities.push({text: word, type: 'CONDITION'});
+            } else {
+                entities.push({text: word, type: 'O'});
+            }
+        });
+        
+        return entities;
+    }
+
+    // Группируем сущности по типам и склеиваем соседние слова одного типа в фразы
+    function groupEntities(entities) {
+        const groups = {
+            AGENT: [],
+            TASK: [],
+            CONDITION: []
         };
-
-        // Initialize test buttons
-        document.querySelectorAll('.test-btn').forEach(button => {
-            button.addEventListener('click', function() {
-                const testNumber = this.getAttribute('data-test');
-                document.getElementById('process-text').value = testCases[testNumber];
-                showStatus(`Loaded test case ${testNumber}`, 'success');
-                // Animate button
-                this.style.transform = 'scale(0.95)';
-                setTimeout(() => {
-                    this.style.transform = '';
-                }, 150);
-            });
-        });
-
-        // Process button
-        document.getElementById('process-btn').addEventListener('click', processText);
         
-        // Reset button
-        document.getElementById('reset-btn').addEventListener('click', resetApp);
-        
-        // Close error button
-        document.getElementById('close-error').addEventListener('click', () => {
-            document.getElementById('error-section').style.display = 'none';
-        });
-        
-        // Fullscreen functions
-        function toggleFullscreen(elementId) {
-            const element = document.getElementById(elementId);
-            const overlay = document.getElementById('fullscreen-overlay');
-            const content = document.getElementById('fullscreen-content');
-            
-            content.innerHTML = element.innerHTML;
-            
-            // Adjust for fullscreen
-            const images = content.querySelectorAll('img');
-            images.forEach(img => {
-                img.style.maxWidth = '100%';
-                img.style.maxHeight = '90vh';
-                img.style.objectFit = 'contain';
-            });
-            
-            overlay.style.display = 'flex';
-            document.body.style.overflow = 'hidden';
-            
-            // Also show Plotly figures in fullscreen
-            if (elementId === 'heatmap-visualization' || elementId === 'sankey-visualization') {
-                setTimeout(() => {
-                    Plotly.Plots.resize(content);
-                }, 100);
+        let current = [];
+        let currentType = null;
+    
+        function flush() {
+            if (!currentType || current.length === 0) return;
+            let phrase = current.join(' ').replace(/[.,]/g, '').trim();
+            if (phrase && !groups[currentType].includes(phrase)) {
+                groups[currentType].push(phrase);
             }
+            current = [];
+            currentType = null;
         }
-        
-        function closeFullscreen() {
-            const overlay = document.getElementById('fullscreen-overlay');
-            overlay.style.display = 'none';
-            document.body.style.overflow = 'auto';
-        }
-        
-        // Download functions
-        function downloadPlantUML() {
-            const url = document.getElementById('plantuml-url').href;
-            if (url && url !== '#') {
-                window.open(url, '_blank');
-            }
-        }
-        
-        function downloadHeatmap() {
-            const plotDiv = document.getElementById('heatmap-visualization');
-            if (plotDiv && plotDiv.querySelector('.plotly')) {
-                Plotly.downloadImage(plotDiv, {
-                    format: 'png',
-                    height: 1200,
-                    width: 1600,
-                    filename: 'uml-heatmap'
-                });
-            }
-        }
-        
-        function downloadSankey() {
-            const plotDiv = document.getElementById('sankey-visualization');
-            if (plotDiv && plotDiv.querySelector('.plotly')) {
-                Plotly.downloadImage(plotDiv, {
-                    format: 'png',
-                    height: 1200,
-                    width: 1600,
-                    filename: 'uml-sankey'
-                });
-            }
-        }
-        
-        // Refresh PlantUML
-        function refreshPlantUML() {
-            const plantumlText = document.getElementById('plantuml-text').textContent;
-            if (plantumlText) {
-                showPlantUML(plantumlText);
-                showStatus('Diagram refreshed', 'success');
-            }
-        }
-        
-        // Function to process text
-        async function processText() {
-            const text = document.getElementById('process-text').value.trim();
-            
-            if (!text) {
-                showError('Please enter process text');
+    
+        entities.forEach((e, idx) => {
+            if (e.type === 'O') {
+                flush();
                 return;
             }
-            
-            // Reset previous state
-            hideAllResults();
-            hideError();
-            hideStatus();
-            
-            // Show progress bar
-            const progressSection = document.getElementById('progress-section');
-            const progressBar = document.getElementById('progress-bar');
-            const progressText = document.getElementById('progress-text');
-            progressSection.style.display = 'block';
-            
-            try {
-                // Simulate processing with progress updates
-                await simulateProcessing(progressBar, progressText);
-                
-                // Generate demo results
-                generateDemoResults(text);
-                
-                // Show success
-                showStatus('✅ Processing completed successfully! Visualizations are ready.', 'success');
-                
-                // Scroll to results
-                setTimeout(() => {
-                    document.querySelector('.results-section').scrollIntoView({ 
-                        behavior: 'smooth',
-                        block: 'start'
-                    });
-                }, 500);
-                
-            } catch (error) {
-                showError(`❌ Processing error: ${error.message}`);
-            } finally {
-                // Hide progress bar after delay
-                setTimeout(() => {
-                    progressSection.style.display = 'none';
-                    progressBar.style.width = '0%';
-                }, 500);
+    
+            if (e.type !== currentType && current.length) {
+                flush();
             }
-        }
-        
-        // Simulate processing with progress
-        async function simulateProcessing(progressBar, progressText) {
-            const steps = [
-                {percent: 10, text: "📖 Parsing text structure..."},
-                {percent: 25, text: "🔍 Extracting entities and participants..."},
-                {percent: 40, text: "👥 Identifying process relationships..."},
-                {percent: 55, text: "📊 Generating UML diagram..."},
-                {percent: 70, text: "🔥 Creating interaction heatmap..."},
-                {percent: 85, text: "🌊 Generating Sankey flow diagram..."},
-                {percent: 95, text: "🎨 Finalizing visualizations..."},
-                {percent: 100, text: "✅ Complete! Rendering results..."}
-            ];
-            
-            for (const step of steps) {
-                await new Promise(resolve => setTimeout(resolve, 500 + Math.random() * 400));
-                progressBar.style.width = step.percent + '%';
-                progressText.textContent = step.text;
+    
+            currentType = e.type;
+            current.push(e.text);
+    
+            if (idx === entities.length - 1) {
+                flush();
             }
-        }
-        
-        // Show error
-        function showError(message) {
-            const errorSection = document.getElementById('error-section');
-            const errorMessage = document.getElementById('error-message');
-            errorMessage.textContent = message;
-            errorSection.style.display = 'block';
-            
-            // Scroll to error
-            errorSection.scrollIntoView({ 
-                behavior: 'smooth',
-                block: 'center'
-            });
-            
-            // Auto-hide error after 15 seconds
-            setTimeout(() => {
-                errorSection.style.display = 'none';
-            }, 15000);
-        }
-        
-        // Hide error
-        function hideError() {
-            document.getElementById('error-section').style.display = 'none';
-        }
-        
-        // Reset function
-        function resetApp() {
-            document.getElementById('process-text').value = '';
-            hideAllResults();
-            hideStatus();
-            hideError();
-            document.getElementById('progress-section').style.display = 'none';
-            showStatus('🔄 Application reset. Ready for new input.', 'success');
-            setTimeout(hideStatus, 2000);
-            
-            // Scroll to top
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-        
-        // Hide all results
-        function hideAllResults() {
-            const resultCards = document.querySelectorAll('.result-card');
-            resultCards.forEach(card => {
-                card.style.display = 'none';
-            });
-        }
-        
-        // Show status
-        function showStatus(message, type) {
-            const statusEl = document.getElementById('status-message');
-            statusEl.innerHTML = message;
-            statusEl.className = `status-message status-${type}`;
-            statusEl.style.display = 'block';
-            
-            if (type === 'loading') {
-                statusEl.innerHTML = `<span class="loading-spinner"></span> ${message}`;
-            }
-            
-            // Auto-hide success messages
-            if (type === 'success') {
-                setTimeout(() => {
-                    if (statusEl.className.includes('status-success')) {
-                        hideStatus();
-                    }
-                }, 5000);
-            }
-        }
-        
-        // Hide status
-        function hideStatus() {
-            document.getElementById('status-message').style.display = 'none';
-        }
-        
-        // Generate demo results
-        // Generate demo results
-        // Экранируем текст для PlantUML (минимально)
-function escapePlantUMLLabel(label) {
-    return label.replace(/"/g, '\\"');
-}
-
-// Генерация PlantUML-диаграммы по сгруппированным сущностям + условные ветки
-function generatePlantUMLFromEntities(grouped, originalText) {
-    const agentsRaw = grouped.AGENT || [];
-    const tasksRaw = grouped.TASK || [];
-    const hasConditionKeyword =
-        (grouped.CONDITION && grouped.CONDITION.length > 0) ||
-        originalText.toLowerCase().includes('if') ||
-        originalText.toLowerCase().includes('otherwise');
-
-    // Участники — уникальные AGENT‑фразы, максимум 6
-    let uniqueAgents = [...new Set(
-        agentsRaw.map(a => a.trim()).filter(a => a.length > 0)
-    )].slice(0, 6);
-
-    // Если агентов не нашли — демо‑набор
-    if (uniqueAgents.length === 0) {
-        uniqueAgents = ['Employee', 'Manager', 'HR Department', 'Finance', 'Support', 'System'];
-    }
-
-    // Обрезаем длинные подписи
-    const cleanAgents = uniqueAgents.map(a =>
-        a.length > 30 ? a.substring(0, 30) + '...' : a
-    );
-
-    // Задачи — последовательность TASK‑фраз
-    const tasks = tasksRaw.map(t => t.trim()).filter(t => t.length > 0);
-
-    // Пытаемся вытащить структурированное ветвление
-    const condStruct = hasConditionKeyword
-        ? extractConditionalStructure(originalText, cleanAgents)
-        : null;
-
-    let plantuml = `@startuml\n`;
-    plantuml += `!theme plain\n`;
-    plantuml += `skinparam backgroundColor #FFFFFF\n`;
-    plantuml += `skinparam sequence {\n`;
-    plantuml += `  ArrowColor #667eea\n`;
-    plantuml += `  ActorBorderColor #000000\n`;
-    plantuml += `  ActorBackgroundColor #E1F5FE\n`;
-    plantuml += `  ParticipantBorderColor #667eea\n`;
-    plantuml += `  ParticipantBackgroundColor #F8F9FF\n`;
-    plantuml += `  LifeLineBorderColor #667eea\n`;
-    plantuml += `  LifeLineBackgroundColor #FFFFFF\n`;
-    plantuml += `  ParticipantFontSize 16\n`;
-    plantuml += `  ActorFontSize 16\n`;
-    plantuml += `}\n\n`;
-
-    plantuml += `title **<color:#667eea>UML Sequence Diagram</color>**\n`;
-    plantuml += `caption Generated from: "${escapePlantUMLLabel(originalText.substring(0, 100))}${originalText.length > 100 ? '...' : ''}"\n\n`;
-
-    // Объявляем участников
-    cleanAgents.forEach((agent, idx) => {
-        plantuml += `participant "<color:#667eea><b>${escapePlantUMLLabel(agent)}</b></color>" as P${idx}\n`;
-    });
-    plantuml += `\n`;
-
-    const nAgents = cleanAgents.length;
-
-    // Линейный поток задач (как раньше, но немного упорядоченный)
-    if (nAgents >= 2 && tasks.length > 0) {
-        tasks.forEach((taskText, i) => {
-            const from = i % nAgents;
-            const to = (i + 1) % nAgents;
-            const label = escapePlantUMLLabel(taskText.length > 80 ? taskText.substring(0, 80) + '...' : taskText);
-
-            plantuml += `P${from} -> P${to} : **<color:#00b09b>${label}</color>**\n`;
-            plantuml += `activate P${to}\n`;
         });
-    } else if (nAgents >= 2) {
-        plantuml += `P0 -> P1 : **<color:#00b09b>Process</color>**\n`;
-        plantuml += `activate P1\n`;
+    
+        return groups;
     }
 
-    // Ветвление (alt) — сначала пробуем использовать разобранную структуру
-    if (condStruct) {
-        plantuml += `\n`;
-        const condLabelEsc = escapePlantUMLLabel(condStruct.conditionLabel);
-
-        plantuml += `alt **<color:#667eea>${condLabelEsc}</color>**\n`;
-
-        // THEN‑ветка
-        const thenShort = condStruct.thenSentence.length > 80
-            ? condStruct.thenSentence.substring(0, 80) + '...'
-            : condStruct.thenSentence;
-        const thenLabel = escapePlantUMLLabel(thenShort);
-
-        plantuml += `  P${condStruct.thenFrom} -> P${condStruct.thenTo} : **<color:#96c93d>${thenLabel}</color>**\n`;
-
-        // ELSE‑ветка, если есть отдельное предложение
-        if (condStruct.elseSentence) {
-            let elseText = condStruct.elseSentence
-                .replace(/^otherwise[,:\s]*/i, '')
-                .replace(/^else[,:\s]*/i, '')
-                .trim();
-            if (!elseText) elseText = condStruct.elseSentence;
-
-            const elseShort = elseText.length > 80 ? elseText.substring(0, 80) + '...' : elseText;
-            const elseLabel = escapePlantUMLLabel(elseShort);
-
-            plantuml += `else **<color:#ff416c>otherwise</color>**\n`;
-            plantuml += `  P${condStruct.elseFrom} -> P${condStruct.elseTo} : **<color:#ff416c>${elseLabel}</color>**\n`;
-        } else {
-            // Если отдельной "otherwise" нет — рисуем абстрактную альтернативу
-            plantuml += `else **<color:#ff416c>otherwise</color>**\n`;
-            plantuml += `  P0 -> P0 : **<color:#ff416c>Alternative path</color>**\n`;
-        }
-
-        plantuml += `end\n`;
-    } else if (hasConditionKeyword) {
-        // Фолбэк: условие есть, но структуру разобрать не смогли — старый универсальный alt
-        plantuml += `\n`;
-        plantuml += `alt **<color:#667eea>Condition / approved</color>**\n`;
-        if (nAgents >= 2) {
-            plantuml += `  P1 -> P0 : **<color:#96c93d>Positive path</color>**\n`;
-        } else {
-            plantuml += `  P0 -> P0 : **<color:#96c93d>Positive path</color>**\n`;
-        }
-        plantuml += `else **<color:#ff416c>Condition / rejected</color>**\n`;
-        if (nAgents >= 2) {
-            plantuml += `  P1 -> P0 : **<color:#ff416c>Negative path</color>**\n`;
-        } else {
-            plantuml += `  P0 -> P0 : **<color:#ff416c>Negative path</color>**\n`;
-        }
-        plantuml += `end\n`;
+    // Разбиваем текст на предложения
+    function splitIntoSentences(text) {
+        return text
+            .split(/(?<=[.!?])\s+/)
+            .map(s => s.trim())
+            .filter(Boolean);
     }
 
-    plantuml += `\n@enduml`;
+    // Пытаемся вытащить из текста одну условную конструкцию: If ... Then ... Otherwise ...
+    function extractConditionalStructure(text, agents) {
+        const sentences = splitIntoSentences(text);
+        const agentsLower = agents.map(a => a.toLowerCase());
 
-    return plantuml;
-}
-
-        
-        // Extract entities from text
-        function extractEntities(text) {
-            const entities = [];
-            const words = text.split(/\s+/);
-            
-            // Simple entity extraction logic
-            words.forEach(word => {
-                const cleanWord = word.replace(/[.,]/g, '').toLowerCase();
-                
-                if (['department', 'service', 'employee', 'customer', 'manager', 'client', 'tester', 'project', 'team', 'system'].some(term => cleanWord.includes(term))) {
-                    entities.push({text: word, type: 'AGENT'});
-                } else if (['submits', 'reviews', 'checks', 'analyzes', 'prepares', 'estimates', 'starts', 'processes', 'informs', 'verifies', 'sends', 'approves', 'accepts'].some(term => cleanWord.includes(term))) {
-                    entities.push({text: word, type: 'TASK'});
-                } else if (['if', 'otherwise', 'when', 'then'].includes(cleanWord)) {
-                    entities.push({text: word, type: 'CONDITION'});
-                } else {
-                    entities.push({text: word, type: 'O'});
-                }
-            });
-            
-            return entities;
-        }
-           // Группируем сущности по типам и склеиваем соседние слова одного типа в фразы
-        function groupEntities(entities) {
-            const groups = {
-                AGENT: [],
-                TASK: [],
-                CONDITION: []
-            };
-            
-            let current = [];
-            let currentType = null;
-        
-            function flush() {
-                if (!currentType || current.length === 0) return;
-                let phrase = current.join(' ').replace(/[.,]/g, '').trim();
-                if (phrase && !groups[currentType].includes(phrase)) {
-                    groups[currentType].push(phrase);
-                }
-                current = [];
-                currentType = null;
+        // Ищем первое предложение с "if"
+        let ifIdx = -1;
+        for (let i = 0; i < sentences.length; i++) {
+            if (sentences[i].toLowerCase().includes('if ')) {
+                ifIdx = i;
+                break;
             }
-        
-            entities.forEach((e, idx) => {
-                // Всё, что не является помеченной сущностью (O), разрывает группу
-                if (e.type === 'O') {
-                    flush();
-                    return;
-                }
-        
-                // Если тип сменился — сбрасываем предыдущую группу
-                if (e.type !== currentType && current.length) {
-                    flush();
-                }
-        
-                currentType = e.type;
-                current.push(e.text);
-        
-                // В конце массива обязательно сбрасываем последнюю группу
-                if (idx === entities.length - 1) {
-                    flush();
-                }
+        }
+        if (ifIdx === -1) return null;
+
+        // Ищем предложение с "otherwise" / "else" после if
+        let elseIdx = -1;
+        for (let j = ifIdx + 1; j < sentences.length; j++) {
+            const lc = sentences[j].toLowerCase();
+            if (lc.startsWith('otherwise') || lc.startsWith('else')) {
+                elseIdx = j;
+                break;
+            }
+        }
+
+        const ifSentence = sentences[ifIdx];
+
+        // then‑ветка: либо следующее предложение, либо само if‑предложение
+        let thenSentence = ifSentence;
+        if (ifIdx + 1 < sentences.length && ifIdx + 1 !== elseIdx) {
+            thenSentence = sentences[ifIdx + 1];
+        }
+
+        const elseSentence = elseIdx !== -1 ? sentences[elseIdx] : null;
+
+        // Поиск упомянутых агентов в предложении
+        function findAgentsInSentence(sentence) {
+            const s = sentence.toLowerCase();
+            const indices = [];
+            agentsLower.forEach((a, idx) => {
+                if (a && s.includes(a)) indices.push(idx);
             });
-        
-            return groups;
+            return indices;
         }
- // Разбиваем текст на предложения
-function splitIntoSentences(text) {
-    return text
-        .split(/(?<=[.!?])\s+/)
-        .map(s => s.trim())
-        .filter(Boolean);
-}
 
-// Пытаемся вытащить из текста одну условную конструкцию: If ... Then ... Otherwise ...
-// agents — массив имён участников (cleanAgents из PlantUML)
-function extractConditionalStructure(text, agents) {
-    const sentences = splitIntoSentences(text);
-    const agentsLower = agents.map(a => a.toLowerCase());
-
-    // Ищем первое предложение с "if"
-    let ifIdx = -1;
-    for (let i = 0; i < sentences.length; i++) {
-        if (sentences[i].toLowerCase().includes('if ')) {
-            ifIdx = i;
-            break;
+        function choosePair(sentence) {
+            const idxs = findAgentsInSentence(sentence);
+            if (idxs.length >= 2) {
+                return { from: idxs[0], to: idxs[1] };
+            }
+            if (idxs.length === 1) {
+                const only = idxs[0];
+                return { from: 0, to: only };
+            }
+            return { from: 0, to: Math.min(1, agents.length - 1) };
         }
-    }
-    if (ifIdx === -1) return null;
 
-    // Ищем предложение с "otherwise" / "else" после if
-    let elseIdx = -1;
-    for (let j = ifIdx + 1; j < sentences.length; j++) {
-        const lc = sentences[j].toLowerCase();
-        if (lc.startsWith('otherwise') || lc.startsWith('else')) {
-            elseIdx = j;
-            break;
-        }
+        const condMatch = ifSentence.match(/if\s+([^,.!?]+)/i);
+        const conditionLabel = condMatch ? condMatch[1].trim() : 'Condition';
+
+        const thenPair = choosePair(thenSentence);
+        const elsePair = elseSentence ? choosePair(elseSentence) : choosePair(ifSentence);
+
+        return {
+            conditionLabel,
+            thenSentence,
+            elseSentence,
+            thenFrom: thenPair.from,
+            thenTo: thenPair.to,
+            elseFrom: elsePair.from,
+            elseTo: elsePair.to
+        };
     }
 
-    const ifSentence = sentences[ifIdx];
-
-    // then‑ветка: либо следующее предложение, либо само if‑предложение
-    let thenSentence = ifSentence;
-    if (ifIdx + 1 < sentences.length && ifIdx + 1 !== elseIdx) {
-        thenSentence = sentences[ifIdx + 1];
+    // Экранируем текст для PlantUML (минимально)
+    function escapePlantUMLLabel(label) {
+        return label.replace(/"/g, '\\"');
     }
 
-    const elseSentence = elseIdx !== -1 ? sentences[elseIdx] : null;
+    // Генерация PlantUML-диаграммы по сгруппированным сущностям + условные ветки
+    function generatePlantUMLFromEntities(grouped, originalText) {
+        const agentsRaw = grouped.AGENT || [];
+        const tasksRaw = grouped.TASK || [];
+        const hasConditionKeyword =
+            (grouped.CONDITION && grouped.CONDITION.length > 0) ||
+            originalText.toLowerCase().includes('if') ||
+            originalText.toLowerCase().includes('otherwise');
 
-    // Поиск упомянутых агентов в предложении
-    function findAgentsInSentence(sentence) {
-        const s = sentence.toLowerCase();
-        const indices = [];
-        agentsLower.forEach((a, idx) => {
-            if (a && s.includes(a)) indices.push(idx);
+        let uniqueAgents = [...new Set(
+            agentsRaw.map(a => a.trim()).filter(a => a.length > 0)
+        )].slice(0, 6);
+
+        if (uniqueAgents.length === 0) {
+            uniqueAgents = ['Employee', 'Manager', 'HR Department', 'Finance', 'Support', 'System'];
+        }
+
+        const cleanAgents = uniqueAgents.map(a =>
+            a.length > 30 ? a.substring(0, 30) + '...' : a
+        );
+
+        const tasks = tasksRaw.map(t => t.trim()).filter(t => t.length > 0);
+
+        const condStruct = hasConditionKeyword
+            ? extractConditionalStructure(originalText, cleanAgents)
+            : null;
+
+        let plantuml = `@startuml\n`;
+        plantuml += `!theme plain\n`;
+        plantuml += `skinparam backgroundColor #FFFFFF\n`;
+        plantuml += `skinparam sequence {\n`;
+        plantuml += `  ArrowColor #667eea\n`;
+        plantuml += `  ActorBorderColor #000000\n`;
+        plantuml += `  ActorBackgroundColor #E1F5FE\n`;
+        plantuml += `  ParticipantBorderColor #667eea\n`;
+        plantuml += `  ParticipantBackgroundColor #F8F9FF\n`;
+        plantuml += `  LifeLineBorderColor #667eea\n`;
+        plantuml += `  LifeLineBackgroundColor #FFFFFF\n`;
+        plantuml += `  ParticipantFontSize 16\n`;
+        plantuml += `  ActorFontSize 16\n`;
+        plantuml += `}\n\n`;
+
+        plantuml += `title **<color:#667eea>UML Sequence Diagram</color>**\n`;
+        plantuml += `caption Generated from: "${escapePlantUMLLabel(originalText.substring(0, 100))}${originalText.length > 100 ? '...' : ''}"\n\n`;
+
+        cleanAgents.forEach((agent, idx) => {
+            plantuml += `participant "<color:#667eea><b>${escapePlantUMLLabel(agent)}</b></color>" as P${idx}\n`;
         });
-        return indices;
-    }
-
-    function choosePair(sentence) {
-        const idxs = findAgentsInSentence(sentence);
-        if (idxs.length >= 2) {
-            return { from: idxs[0], to: idxs[1] };
-        }
-        if (idxs.length === 1) {
-            const only = idxs[0];
-            // если нашли одного — пусть он будет получателем, а отправитель — первый агент в диаграмме
-            return { from: 0, to: only };
-        }
-        // если никого не нашли — просто P0 -> P1 (если есть)
-        return { from: 0, to: Math.min(1, agents.length - 1) };
-    }
-
-    // Вытащим текст условия из "if ..."
-    const condMatch = ifSentence.match(/if\s+([^,.!?]+)/i);
-    const conditionLabel = condMatch ? condMatch[1].trim() : 'Condition';
-
-    const thenPair = choosePair(thenSentence);
-    const elsePair = elseSentence ? choosePair(elseSentence) : choosePair(ifSentence);
-
-    return {
-        conditionLabel,
-        thenSentence,
-        elseSentence,
-        thenFrom: thenPair.from,
-        thenTo: thenPair.to,
-        elseFrom: elsePair.from,
-        elseTo: elsePair.to
-    };
-}
-
-        // Extract participants from text
-        function extractAgents(text) {
-            const agents = [];
-            const sentences = text.split(/[.,]/g);
-            
-            sentences.forEach(sentence => {
-                if (sentence.includes('department') || sentence.includes('service') || sentence.includes('employee') || 
-                    sentence.includes('customer') || sentence.includes('manager') || sentence.includes('client') ||
-                    sentence.includes('project') || sentence.includes('team') || sentence.includes('system')) {
-                    
-                    // Simplified agent extraction
-                    const words = sentence.trim().split(/\s+/);
-                    if (words.length > 0) {
-                        const agent = words.slice(0, Math.min(4, words.length)).join(' ');
-                        if (agent && !agents.includes(agent)) {
-                            agents.push(agent);
-                        }
-                    }
-                }
-            });
-            
-            // If no agents found, create demo agents
-            if (agents.length === 0) {
-                return ['Employee', 'Manager', 'HR Department', 'Finance Department', 'Support Service'];
-            }
-            
-            return agents;
-        }
-        
-        // Show entity highlighting
-        function showEntityHighlighting(entities) {
-            const container = document.getElementById('highlighted-text');
-            let html = '';
-            
-            // Group entities for better display
-            let currentGroup = [];
-            let currentType = null;
-            
-            entities.forEach((entity, index) => {
-                if (entity.type !== currentType && currentGroup.length > 0) {
-                    html += createEntitySpan(currentGroup.join(' '), currentType);
-                    currentGroup = [];
-                }
-                
-                currentGroup.push(entity.text);
-                currentType = entity.type;
-                
-                // If last entity, output group
-                if (index === entities.length - 1) {
-                    html += createEntitySpan(currentGroup.join(' '), currentType);
-                }
-            });
-            
-            container.innerHTML = html;
-            document.getElementById('result-highlighting').style.display = 'block';
-        }
-        
-        // Create entity span
-        function createEntitySpan(text, type) {
-            const typeClass = `entity-${type.toLowerCase()}`;
-            const displayType = type !== 'O' ? type : '';
-            const icon = type === 'AGENT' ? '👤' : type === 'TASK' ? '⚙️' : type === 'CONDITION' ? '🔀' : '';
-            
-            return `
-                <span class="entity ${typeClass}">
-                    ${icon} ${text}
-                    ${displayType ? `<span class="entity-label">${displayType}</span>` : ''}
-                </span>
-            `;
-        }
-        // Экранируем текст для PlantUML (минимально)
-function escapePlantUMLLabel(label) {
-    return label.replace(/"/g, '\\"');
-}
-
-// Генерация PlantUML-диаграммы по сгруппированным сущностям
-function generatePlantUMLFromEntities(grouped, originalText) {
-    const agentsRaw = grouped.AGENT || [];
-    const tasksRaw = grouped.TASK || [];
-    const hasCondition = (grouped.CONDITION && grouped.CONDITION.length > 0) ||
-        originalText.toLowerCase().includes('if') ||
-        originalText.toLowerCase().includes('otherwise');
-
-    // Участники — уникальные AGENT-фразы, максимум 6
-    let uniqueAgents = [...new Set(
-        agentsRaw.map(a => a.trim()).filter(a => a.length > 0)
-    )].slice(0, 6);
-
-    // Если агентов не нашли — используем демо-набор
-    if (uniqueAgents.length === 0) {
-        uniqueAgents = ['Employee', 'Manager', 'HR Department', 'Finance', 'Support', 'System'];
-    }
-
-    // Обрезаем слишком длинные подписи
-    const cleanAgents = uniqueAgents.map(a =>
-        a.length > 30 ? a.substring(0, 30) + '...' : a
-    );
-
-    // Задачи — последовательность TASK-фраз в порядке появления
-    const tasks = tasksRaw.map(t => t.trim()).filter(t => t.length > 0);
-
-    let plantuml = `@startuml\n`;
-    plantuml += `!theme plain\n`;
-    plantuml += `skinparam backgroundColor #FFFFFF\n`;
-    plantuml += `skinparam sequence {\n`;
-    plantuml += `  ArrowColor #667eea\n`;
-    plantuml += `  ActorBorderColor #000000\n`;
-    plantuml += `  ActorBackgroundColor #E1F5FE\n`;
-    plantuml += `  ParticipantBorderColor #667eea\n`;
-    plantuml += `  ParticipantBackgroundColor #F8F9FF\n`;
-    plantuml += `  LifeLineBorderColor #667eea\n`;
-    plantuml += `  LifeLineBackgroundColor #FFFFFF\n`;
-    plantuml += `  ParticipantFontSize 16\n`;
-    plantuml += `  ActorFontSize 16\n`;
-    plantuml += `}\n\n`;
-
-    plantuml += `title **<color:#667eea>UML Sequence Diagram</color>**\n`;
-    plantuml += `caption Generated from: "${escapePlantUMLLabel(originalText.substring(0, 100))}${originalText.length > 100 ? '...' : ''}"\n\n`;
-
-    // Объявляем участников
-    cleanAgents.forEach((agent, idx) => {
-        plantuml += `participant "<color:#667eea><b>${escapePlantUMLLabel(agent)}</b></color>" as P${idx}\n`;
-    });
-    plantuml += `\n`;
-
-    const nAgents = cleanAgents.length;
-
-    // Если есть хотя бы 2 участника — строим последовательность задач между ними
-    if (nAgents >= 2 && tasks.length > 0) {
-        tasks.forEach((taskText, i) => {
-            const from = i % nAgents;
-            const to = (i + 1) % nAgents;
-            const label = escapePlantUMLLabel(taskText);
-
-            plantuml += `P${from} -> P${to} : **<color:#00b09b>${label}</color>**\n`;
-            plantuml += `activate P${to}\n`;
-        });
-    } else if (nAgents >= 2) {
-        // Если задач не нашли — хотя бы один базовый вызов
-        plantuml += `P0 -> P1 : **<color:#00b09b>Process</color>**\n`;
-        plantuml += `activate P1\n`;
-    }
-
-    // Ветвление по условиям
-    if (hasCondition) {
         plantuml += `\n`;
-        const condLabel = grouped.CONDITION && grouped.CONDITION[0]
-            ? escapePlantUMLLabel(grouped.CONDITION[0])
-            : 'Condition';
 
-        plantuml += `alt **<color:#667eea>${condLabel} / approved</color>**\n`;
-        if (nAgents >= 2) {
-            plantuml += `  P1 -> P0 : **<color:#96c93d>Positive path</color>**\n`;
-        } else {
-            plantuml += `  P0 -> P0 : **<color:#96c93d>Positive path</color>**\n`;
-        }
+        const nAgents = cleanAgents.length;
 
-        plantuml += `else **<color:#ff416c>${condLabel} / rejected</color>**\n`;
-        if (nAgents >= 2) {
-            plantuml += `  P1 -> P0 : **<color:#ff416c>Negative path</color>**\n`;
-        } else {
-            plantuml += `  P0 -> P0 : **<color:#ff416c>Negative path</color>**\n`;
-        }
-        plantuml += `end\n`;
-    }
+        if (nAgents >= 2 && tasks.length > 0) {
+            tasks.forEach((taskText, i) => {
+                const from = i % nAgents;
+                const to = (i + 1) % nAgents;
+                const label = escapePlantUMLLabel(taskText.length > 80 ? taskText.substring(0, 80) + '...' : taskText);
 
-    plantuml += `\n@enduml`;
-
-    return plantuml;
-}
-
-        // Generate PlantUML text
-        function generatePlantUML(text) {
-            const agents = extractAgents(text);
-            const hasCondition = text.toLowerCase().includes('if') || text.toLowerCase().includes('otherwise');
-            
-            let plantuml = `@startuml\n`;
-            plantuml += `!theme plain\n`;
-            plantuml += `skinparam backgroundColor #FFFFFF\n`;
-            plantuml += `skinparam sequence {\n`;
-            plantuml += `  ArrowColor #667eea\n`;
-            plantuml += `  ActorBorderColor #000000\n`;
-            plantuml += `  ActorBackgroundColor #E1F5FE\n`;
-            plantuml += `  ParticipantBorderColor #667eea\n`;
-            plantuml += `  ParticipantBackgroundColor #F8F9FF\n`;
-            plantuml += `  LifeLineBorderColor #667eea\n`;
-            plantuml += `  LifeLineBackgroundColor #FFFFFF\n`;
-            plantuml += `  ParticipantFontSize 16\n`;
-            plantuml += `  ActorFontSize 16\n`;
-            plantuml += `}\n\n`;
-            plantuml += `title **<color:#667eea>UML Sequence Diagram</color>**\n`;
-            plantuml += `caption Generated from: "${text.substring(0, 100)}${text.length > 100 ? '...' : ''}"\n\n`;
-            
-            // Get unique agents
-            const uniqueAgents = [...new Set(agents.map(agent => 
-                agent.split(' ').slice(0, 3).join(' ')
-            ))].slice(0, 6);
-            
-            if (uniqueAgents.length === 0) {
-                uniqueAgents.push('Employee', 'Manager', 'HR Department', 'Finance', 'Support', 'System');
-            }
-            
-            // Add participants
-            uniqueAgents.forEach((agent, index) => {
-                const cleanName = agent.length > 30 ? agent.substring(0, 30) + "..." : agent;
-                plantuml += `participant "<color:#667eea><b>${cleanName}</b></color>" as P${index}\n`;
+                plantuml += `P${from} -> P${to} : **<color:#00b09b>${label}</color>**\n`;
+                plantuml += `activate P${to}\n`;
             });
-            
+        } else if (nAgents >= 2) {
+            plantuml += `P0 -> P1 : **<color:#00b09b>Process</color>**\n`;
+            plantuml += `activate P1\n`;
+        }
+
+        if (condStruct) {
             plantuml += `\n`;
-            
-            // Add process flow
-            if (uniqueAgents.length >= 2) {
-                plantuml += `P0 -> P1 : **<color:#00b09b>Submit request</color>**\n`;
-                plantuml += `activate P1\n`;
-                
-                if (uniqueAgents.length >= 3) {
-                    plantuml += `P1 -> P2 : **<color:#00b09b>Review request</color>**\n`;
-                    plantuml += `activate P2\n`;
-                }
-            }
-            
-            // Add conditional flow
-            if (hasCondition) {
-                plantuml += `\n`;
-                plantuml += `alt **<color:#667eea>Request approved</color>**\n`;
-                
-                if (uniqueAgents.length >= 3) {
-                    plantuml += `  P2 -> P0 : **<color:#96c93d>Process request</color>**\n`;
-                    plantuml += `  deactivate P2\n`;
-                } else if (uniqueAgents.length >= 2) {
-                    plantuml += `  P1 -> P0 : **<color:#96c93d>Process request</color>**\n`;
-                }
-                
-                plantuml += `else **<color:#ff416c>Request rejected</color>**\n`;
-                if (uniqueAgents.length >= 2) {
-                    plantuml += `  P1 -> P0 : **<color:#ff416c>Inform rejection</color>**\n`;
-                } else {
-                    plantuml += `  P0 -> P0 : **<color:#ff416c>Inform rejection</color>**\n`;
-                }
-                plantuml += `end\n`;
-                
-                if (uniqueAgents.length >= 2) {
-                    plantuml += `deactivate P1\n`;
-                }
-            }
-            
-            plantuml += `\n@enduml`;
-            
-            return plantuml;
-        }
-        
-        // Show PlantUML
+            const condLabelEsc = escapePlantUMLLabel(condStruct.conditionLabel);
 
-        function showPlantUML(plantumlText) {
-            document.getElementById('plantuml-text').textContent = plantumlText;
-            
-            try {
-                const encoded = encodePlantUML(plantumlText);
-                const url = `https://www.plantuml.com/plantuml/svg/${encoded}`;
-                
-                const imgContainer = document.getElementById('plantuml-image');
-                imgContainer.innerHTML = `
-                    <div class="plantuml-image-container">
-                        <img src="${url}" 
-                             alt="UML Diagram"
-                             onload="console.log('PlantUML loaded successfully')"
-                             onerror="handlePlantUMLError(this, '${url}')">
-                    </div>
-                `;
-                
-                const urlLink = document.getElementById("plantuml-url");
-                urlLink.href = url;
-                urlLink.style.display = "block";
-                document.getElementById('result-plantuml').style.display = 'block';
-                
-            } catch (err) {
-                console.error("PlantUML generation error:", err);
-                document.getElementById('plantuml-image').innerHTML =
-                    `<div style="color:#ff416c; padding:20px;">❌ Error generating diagram: ${err.message}</div>`;
+            plantuml += `alt **<color:#667eea>${condLabelEsc}</color>**\n`;
+
+            const thenShort = condStruct.thenSentence.length > 80
+                ? condStruct.thenSentence.substring(0, 80) + '...'
+                : condStruct.thenSentence;
+            const thenLabel = escapePlantUMLLabel(thenShort);
+
+            plantuml += `  P${condStruct.thenFrom} -> P${condStruct.thenTo} : **<color:#96c93d>${thenLabel}</color>**\n`;
+
+            if (condStruct.elseSentence) {
+                let elseText = condStruct.elseSentence
+                    .replace(/^otherwise[,:\s]*/i, '')
+                    .replace(/^else[,:\s]*/i, '')
+                    .trim();
+                if (!elseText) elseText = condStruct.elseSentence;
+
+                const elseShort = elseText.length > 80 ? elseText.substring(0, 80) + '...' : elseText;
+                const elseLabel = escapePlantUMLLabel(elseShort);
+
+                plantuml += `else **<color:#ff416c>otherwise</color>**\n`;
+                plantuml += `  P${condStruct.elseFrom} -> P${condStruct.elseTo} : **<color:#ff416c>${elseLabel}</color>**\n`;
+            } else {
+                plantuml += `else **<color:#ff416c>otherwise</color>**\n`;
+                plantuml += `  P0 -> P0 : **<color:#ff416c>Alternative path</color>**\n`;
             }
+
+            plantuml += `end\n`;
+        } else if (hasConditionKeyword) {
+            plantuml += `\n`;
+            plantuml += `alt **<color:#667eea>Condition / approved</color>**\n`;
+            if (nAgents >= 2) {
+                plantuml += `  P1 -> P0 : **<color:#96c93d>Positive path</color>**\n`;
+            } else {
+                plantuml += `  P0 -> P0 : **<color:#96c93d>Positive path</color>**\n`;
+            }
+            plantuml += `else **<color:#ff416c>Condition / rejected</color>**\n`;
+            if (nAgents >= 2) {
+                plantuml += `  P1 -> P0 : **<color:#ff416c>Negative path</color>**\n`;
+            } else {
+                plantuml += `  P0 -> P0 : **<color:#ff416c>Negative path</color>**\n`;
+            }
+            plantuml += `end\n`;
         }
 
-        
-        // CORRECT PlantUML encoding function
+        plantuml += `\n@enduml`;
 
-        function encodePlantUML(text) {
-            const utf8 = new TextEncoder().encode(text);
-            const compressed = pako.deflateRaw(utf8, { level: 9 });
-            
-            function encode6bit(b) {
-                if (b < 10) return String.fromCharCode(48 + b);
-                b -= 10;
-                if (b < 26) return String.fromCharCode(65 + b);
-                b -= 26;
-                if (b < 26) return String.fromCharCode(97 + b);
-                b -= 26;
-                return b === 0 ? '-' : '_';
+        return plantuml;
+    }
+
+    // Extract participants from text (fallback)
+    function extractAgents(text) {
+        const agents = [];
+        const sentences = text.split(/[.,]/g);
+        
+        sentences.forEach(sentence => {
+            if (sentence.includes('department') || sentence.includes('service') || sentence.includes('employee') || 
+                sentence.includes('customer') || sentence.includes('manager') || sentence.includes('client') ||
+                sentence.includes('project') || sentence.includes('team') || sentence.includes('system')) {
+                
+                const words = sentence.trim().split(/\s+/);
+                if (words.length > 0) {
+                    const agent = words.slice(0, Math.min(4, words.length)).join(' ');
+                    if (agent && !agents.includes(agent)) {
+                        agents.push(agent);
+                    }
+                }
             }
-            
-            function append3bytes(b1, b2, b3) {
-                const c1 = b1 >> 2;
-                const c2 = ((b1 & 0x3) << 4) | (b2 >> 4);
-                const c3 = ((b2 & 0xF) << 2) | (b3 >> 6);
-                const c4 = b3 & 0x3F;
-                return encode6bit(c1) + encode6bit(c2) + encode6bit(c3) + encode6bit(c4);
-            }
-            
-            let result = "";
-            for (let i = 0; i < compressed.length; i += 3) {
-                const b1 = compressed[i];
-                const b2 = i + 1 < compressed.length ? compressed[i + 1] : 0;
-                const b3 = i + 2 < compressed.length ? compressed[i + 2] : 0;
-                result += append3bytes(b1, b2, b3);
-            }
-            return result;
+        });
+        
+        if (agents.length === 0) {
+            return ['Employee', 'Manager', 'HR Department', 'Finance Department', 'Support Service'];
         }
-
         
-        // Show interaction matrix
-        function showInteractionMatrix(agents) {
-            if (agents.length === 0) return;
+        return agents;
+    }
+
+    // Show entity highlighting
+    function showEntityHighlighting(entities) {
+        const container = document.getElementById('highlighted-text');
+        let html = '';
+        
+        let currentGroup = [];
+        let currentType = null;
+        
+        entities.forEach((entity, index) => {
+            if (entity.type !== currentType && currentGroup.length > 0) {
+                html += createEntitySpan(currentGroup.join(' '), currentType);
+                currentGroup = [];
+            }
             
-            // Clean agent names
+            currentGroup.push(entity.text);
+            currentType = entity.type;
+            
+            if (index === entities.length - 1) {
+                html += createEntitySpan(currentGroup.join(' '), currentType);
+            }
+        });
+        
+        container.innerHTML = html;
+        document.getElementById('result-highlighting').style.display = 'block';
+    }
+    
+    // Create entity span
+    function createEntitySpan(text, type) {
+        const typeClass = `entity-${type.toLowerCase()}`;
+        const displayType = type !== 'O' ? type : '';
+        const icon = type === 'AGENT' ? '👤' : type === 'TASK' ? '⚙️' : type === 'CONDITION' ? '🔀' : '';
+        
+        return `
+            <span class="entity ${typeClass}">
+                ${icon} ${text}
+                ${displayType ? `<span class="entity-label">${displayType}</span>` : ''}
+            </span>
+        `;
+    }
+
+    // Основная функция генерации результатов
+    function generateDemoResults(text) {
+        const entities = extractEntities(text);
+        const grouped = groupEntities(entities);
+
+        showEntityHighlighting(entities);
+
+        const plantumlText = generatePlantUMLFromEntities(grouped, text);
+        showPlantUML(plantumlText);
+
+        let agents = grouped.AGENT && grouped.AGENT.length > 0
+            ? grouped.AGENT
+            : extractAgents(text);
+
+        showInteractionMatrix(agents);
+        generateHeatmap(agents);
+        generateSankey(agents);
+    }
+
+    // Show PlantUML
+    function showPlantUML(plantumlText) {
+        document.getElementById('plantuml-text').textContent = plantumlText;
+        
+        try {
+            const encoded = encodePlantUML(plantumlText);
+            const url = `https://www.plantuml.com/plantuml/svg/${encoded}`;
+            
+            const imgContainer = document.getElementById('plantuml-image');
+            imgContainer.innerHTML = `
+                <div class="plantuml-image-container">
+                    <img src="${url}" 
+                         alt="UML Diagram"
+                         onload="console.log('PlantUML loaded successfully')"
+                         onerror="handlePlantUMLError(this, '${url}')">
+                </div>
+            `;
+            
+            const urlLink = document.getElementById("plantuml-url");
+            urlLink.href = url;
+            urlLink.style.display = "block";
+            document.getElementById('result-plantuml').style.display = 'block';
+            
+        } catch (err) {
+            console.error("PlantUML generation error:", err);
+            document.getElementById('plantuml-image').innerHTML =
+                `<div style="color:#ff416c; padding:20px;">❌ Error generating diagram: ${err.message}</div>`;
+        }
+    }
+
+    // Обработчик ошибки загрузки PlantUML
+    function handlePlantUMLError(img, url) {
+        console.error('Error loading PlantUML image:', url);
+        if (img && img.parentElement) {
+            img.parentElement.innerHTML = `
+                <div style="color:#ff416c; padding:20px;">
+                    ❌ Error loading UML diagram from PlantUML server.
+                </div>`;
+        }
+    }
+
+    // CORRECT PlantUML encoding function
+    function encodePlantUML(text) {
+        const utf8 = new TextEncoder().encode(text);
+        const compressed = pako.deflateRaw(utf8, { level: 9 });
+        
+        function encode6bit(b) {
+            if (b < 10) return String.fromCharCode(48 + b);
+            b -= 10;
+            if (b < 26) return String.fromCharCode(65 + b);
+            b -= 26;
+            if (b < 26) return String.fromCharCode(97 + b);
+            b -= 26;
+            return b === 0 ? '-' : '_';
+        }
+        
+        function append3bytes(b1, b2, b3) {
+            const c1 = b1 >> 2;
+            const c2 = ((b1 & 0x3) << 4) | (b2 >> 4);
+            const c3 = ((b2 & 0xF) << 2) | (b3 >> 6);
+            const c4 = b3 & 0x3F;
+            return encode6bit(c1) + encode6bit(c2) + encode6bit(c3) + encode6bit(c4);
+        }
+        
+        let result = "";
+        for (let i = 0; i < compressed.length; i += 3) {
+            const b1 = compressed[i];
+            const b2 = i + 1 < compressed.length ? compressed[i + 1] : 0;
+            const b3 = i + 2 < compressed.length ? compressed[i + 2] : 0;
+            result += append3bytes(b1, b2, b3);
+        }
+        return result;
+    }
+
+    // Show interaction matrix
+    function showInteractionMatrix(agents) {
+        if (agents.length === 0) return;
+        
+        const cleanAgents = agents.map(agent => agent.split(' ').slice(0, 3).join(' '));
+        
+        let matrixText = 'PARTICIPANTS: ' + cleanAgents.map((agent, i) => `P${i}=${agent}`).join(', ') + '\n\n';
+        matrixText += 'INTERACTION MATRIX (0-10 interactions):\n\n';
+        
+        matrixText += '        ' + cleanAgents.map((_, i) => `P${i}`.padEnd(12)).join('') + '\n';
+        matrixText += '       ┌' + '─'.repeat(cleanAgents.length * 12 - 1) + '┐\n';
+        
+        for (let i = 0; i < cleanAgents.length; i++) {
+            matrixText += `P${i}    │`;
+            for (let j = 0; j < cleanAgents.length; j++) {
+                const value = i === j ? '    -    ' : `    ${Math.floor(Math.random() * 11)}    `;
+                matrixText += value;
+            }
+            matrixText += '│\n';
+        }
+        
+        matrixText += '       └' + '─'.repeat(cleanAgents.length * 12 - 1) + '┘\n\n';
+        matrixText += 'Legend: - = Self-interaction (0)\n';
+        matrixText += '        Higher numbers = More interactions\n';
+        
+        document.getElementById('matrix-text').textContent = matrixText;
+    }
+    
+    // Generate heatmap
+    function generateHeatmap(agents) {
+        if (agents.length === 0) {
+            document.getElementById('result-heatmap').style.display = 'block';
+            return;
+        }
+        
+        try {
             const cleanAgents = agents.map(agent => agent.split(' ').slice(0, 3).join(' '));
             
-            // Create matrix with better formatting
-            let matrixText = 'PARTICIPANTS: ' + cleanAgents.map((agent, i) => `P${i}=${agent}`).join(', ') + '\n\n';
-            matrixText += 'INTERACTION MATRIX (0-10 interactions):\n\n';
-            
-            // Header
-            matrixText += '        ' + cleanAgents.map((_, i) => `P${i}`.padEnd(12)).join('') + '\n';
-            matrixText += '       ┌' + '─'.repeat(cleanAgents.length * 12 - 1) + '┐\n';
+            const data = [];
+            const annotations = [];
             
             for (let i = 0; i < cleanAgents.length; i++) {
-                matrixText += `P${i}    │`;
+                const row = [];
                 for (let j = 0; j < cleanAgents.length; j++) {
-                    const value = i === j ? '    -    ' : `    ${Math.floor(Math.random() * 11)}    `;
-                    matrixText += value;
-                }
-                matrixText += '│\n';
-            }
-            
-            matrixText += '       └' + '─'.repeat(cleanAgents.length * 12 - 1) + '┘\n\n';
-            matrixText += 'Legend: - = Self-interaction (0)\n';
-            matrixText += '        Higher numbers = More interactions\n';
-            
-            document.getElementById('matrix-text').textContent = matrixText;
-        }
-        
-        // Generate heatmap
-        function generateHeatmap(agents) {
-            if (agents.length === 0) {
-                document.getElementById('result-heatmap').style.display = 'block';
-                return;
-            }
-            
-            try {
-                // Clean agent names
-                const cleanAgents = agents.map(agent => agent.split(' ').slice(0, 3).join(' '));
-                
-                // Create data
-                const data = [];
-                const annotations = [];
-                
-                for (let i = 0; i < cleanAgents.length; i++) {
-                    const row = [];
-                    for (let j = 0; j < cleanAgents.length; j++) {
-                        const value = i === j ? 0 : Math.floor(Math.random() * 10);
-                        row.push(value);
-                        
-                        // Add annotation for values > 5
-                        if (value > 5) {
-                            annotations.push({
-                                x: cleanAgents[j],
-                                y: cleanAgents[i],
-                                text: value.toString(),
-                                font: { color: 'white', size: 12, weight: 'bold' },
-                                showarrow: false
-                            });
-                        }
-                    }
-                    data.push(row);
-                }
-                
-                const trace = {
-                    z: data,
-                    x: cleanAgents,
-                    y: cleanAgents,
-                    type: 'heatmap',
-                    colorscale: [
-                        [0, '#f7fbff'],
-                        [0.1, '#deebf7'],
-                        [0.2, '#c6dbef'],
-                        [0.3, '#9ecae1'],
-                        [0.4, '#6baed6'],
-                        [0.5, '#4292c6'],
-                        [0.6, '#2171b5'],
-                        [0.7, '#08519c'],
-                        [0.8, '#08306b'],
-                        [1, '#000033']
-                    ],
-                    hoverongaps: false,
-                    showscale: true,
-                    colorbar: {
-                        title: { text: 'Interactions', font: { size: 16 } },
-                        titleside: 'right',
-                        thickness: 20,
-                        len: 0.9
-                    },
-                    hovertemplate: 'From: %{y}<br>To: %{x}<br>Interactions: %{z}<extra></extra>'
-                };
-                
-                const container = document.getElementById('heatmap-visualization');
-                const layout = {
-                    title: {
-                        text: '<span style="font-size:20px; color:#667eea;">Participant Interaction Heatmap</span>',
-                        font: { size: 20, color: '#2c3e50' }
-                    },
-                    xaxis: { 
-                        title: { text: 'To Participant', font: { size: 16, color: '#667eea' } },
-                        tickangle: -45,
-                        tickfont: { size: 10 }
-                    },
-                    yaxis: { 
-                        title: { text: 'From Participant', font: { size: 16, color: '#667eea' } },
-                        autorange: 'reversed',
-                        tickfont: { size: 10 }
-                    },
-                    width: container.offsetWidth,
-                    height: container.offsetHeight,
-                    margin: { t: 60, r: 80, b: 80, l: 100 },
-                    annotations: annotations,
-                    paper_bgcolor: 'rgba(255,255,255,0.1)',
-                    plot_bgcolor: 'rgba(255,255,255,0.1)'
-                };
-                
-                // Clear container and create plot
-                container.innerHTML = '';
-                const plotDiv = document.createElement('div');
-                plotDiv.style.width = '100%';
-                plotDiv.style.height = '100%';
-                container.appendChild(plotDiv);
-                Plotly.newPlot(plotDiv, [trace], layout);
-                document.getElementById('result-heatmap').style.display = 'block';
-                
-                // Resize on window resize
-                window.addEventListener('resize', function() {
-                    Plotly.Plots.resize(plotDiv);
-                });
-                
-            } catch (error) {
-                const container = document.getElementById('heatmap-visualization');
-                container.innerHTML = `<div style="text-align:center; padding:15px; color:#ff416c">
-                    <div style="font-size: 30px; margin-bottom: 10px;">🔥</div>
-                    <h3 style="font-size: 16px;">Heatmap Error</h3>
-                    <p style="font-size: 14px;">${error.message}</p>
-                </div>`;
-                document.getElementById('result-heatmap').style.display = 'block';
-            }
-        }
-        
-        // Generate Sankey diagram
-        function generateSankey(agents) {
-            if (agents.length < 2) {
-                document.getElementById('result-sankey').style.display = 'block';
-                return;
-            }
-            
-            try {
-                // Clean agent names
-                const cleanAgents = agents.map(agent => agent.split(' ').slice(0, 3).join(' '));
-                
-                // Create data
-                const sources = [];
-                const targets = [];
-                const values = [];
-                
-                // Create main flow
-                for (let i = 0; i < cleanAgents.length - 1; i++) {
-                    sources.push(i);
-                    targets.push(i + 1);
-                    values.push(Math.floor(Math.random() * 30) + 20);
-                }
-                
-                // Add some cross-connections for complexity
-                if (cleanAgents.length >= 3) {
-                    sources.push(0);
-                    targets.push(2);
-                    values.push(Math.floor(Math.random() * 25) + 10);
+                    const value = i === j ? 0 : Math.floor(Math.random() * 10);
+                    row.push(value);
                     
-                    sources.push(1);
-                    targets.push(cleanAgents.length - 1);
-                    values.push(Math.floor(Math.random() * 20) + 5);
-                }
-                
-                if (cleanAgents.length >= 4) {
-                    sources.push(2);
-                    targets.push(0);
-                    values.push(Math.floor(Math.random() * 15) + 5);
-                }
-                
-                const trace = {
-                    type: "sankey",
-                    orientation: "h",
-                    arrangement: "snap",
-                    node: {
-                        pad: 30,
-                        thickness: 25,
-                        line: {
-                            color: "black",
-                            width: 2
-                        },
-                        label: cleanAgents,
-                        color: ["#667eea", "#764ba2", "#00b09b", "#96c93d", "#ff416c", "#ff4b2b", "#ffb347", "#ffcc33"].slice(0, cleanAgents.length),
-                        hovertemplate: '%{label}<br>Total flow: %{value}<extra></extra>',
-                        x: cleanAgents.map((_, i) => i * (1 / (cleanAgents.length - 1))),
-                        y: cleanAgents.map((_, i) => 0.1 + (i % 2) * 0.3)
-                    },
-                    link: {
-                        source: sources,
-                        target: targets,
-                        value: values,
-                        color: ["rgba(102, 126, 234, 0.6)", "rgba(118, 75, 162, 0.6)", "rgba(0, 176, 155, 0.6)", 
-                                "rgba(150, 201, 61, 0.6)", "rgba(255, 65, 108, 0.6)", "rgba(255, 75, 43, 0.6)",
-                                "rgba(255, 179, 71, 0.6)", "rgba(255, 204, 51, 0.6)"],
-                        hovertemplate: 'From: %{source.label}<br>To: %{target.label}<br>Value: %{value}<extra></extra>'
+                    if (value > 5) {
+                        annotations.push({
+                            x: cleanAgents[j],
+                            y: cleanAgents[i],
+                            text: value.toString(),
+                            font: { color: 'white', size: 12, weight: 'bold' },
+                            showarrow: false
+                        });
                     }
-                };
-                
-                const container = document.getElementById('sankey-visualization');
-                const layout = {
-                    title: {
-                        text: '<span style="font-size:20px; color:#667eea;">Resource Flow Diagram (Sankey)</span>',
-                        font: { size: 20, color: '#2c3e50' }
-                    },
-                    font: { size: 12, color: '#2c3e50' },
-                    width: container.offsetWidth,
-                    height: container.offsetHeight,
-                    margin: { t: 60, r: 40, b: 40, l: 100 },
-                    paper_bgcolor: 'rgba(255,255,255,0.1)',
-                    plot_bgcolor: 'rgba(255,255,255,0.1)'
-                };
-                
-                // Clear container and create plot
-                container.innerHTML = '';
-                const plotDiv = document.createElement('div');
-                plotDiv.style.width = '100%';
-                plotDiv.style.height = '100%';
-                container.appendChild(plotDiv);
-                Plotly.newPlot(plotDiv, [trace], layout);
-                document.getElementById('result-sankey').style.display = 'block';
-                
-                // Resize on window resize
-                window.addEventListener('resize', function() {
-                    Plotly.Plots.resize(plotDiv);
-                });
-                
-            } catch (error) {
-                const container = document.getElementById('sankey-visualization');
-                container.innerHTML = `<div style="text-align:center; padding:15px; color:#ff416c">
-                    <div style="font-size: 30px; margin-bottom: 10px;">🌊</div>
-                    <h3 style="font-size: 16px;">Sankey Diagram Error</h3>
-                    <p style="font-size: 14px;">${error.message}</p>
-                </div>`;
-                document.getElementById('result-sankey').style.display = 'block';
+                }
+                data.push(row);
             }
+            
+            const trace = {
+                z: data,
+                x: cleanAgents,
+                y: cleanAgents,
+                type: 'heatmap',
+                colorscale: [
+                    [0, '#f7fbff'],
+                    [0.1, '#deebf7'],
+                    [0.2, '#c6dbef'],
+                    [0.3, '#9ecae1'],
+                    [0.4, '#6baed6'],
+                    [0.5, '#4292c6'],
+                    [0.6, '#2171b5'],
+                    [0.7, '#08519c'],
+                    [0.8, '#08306b'],
+                    [1, '#000033']
+                ],
+                hoverongaps: false,
+                showscale: true,
+                colorbar: {
+                    title: { text: 'Interactions', font: { size: 16 } },
+                    titleside: 'right',
+                    thickness: 20,
+                    len: 0.9
+                },
+                hovertemplate: 'From: %{y}<br>To: %{x}<br>Interactions: %{z}<extra></extra>'
+            };
+            
+            const container = document.getElementById('heatmap-visualization');
+            const layout = {
+                title: {
+                    text: '<span style="font-size:20px; color:#667eea;">Participant Interaction Heatmap</span>',
+                    font: { size: 20, color: '#2c3e50' }
+                },
+                xaxis: { 
+                    title: { text: 'To Participant', font: { size: 16, color: '#667eea' } },
+                    tickangle: -45,
+                    tickfont: { size: 10 }
+                },
+                yaxis: { 
+                    title: { text: 'From Participant', font: { size: 16, color: '#667eea' } },
+                    autorange: 'reversed',
+                    tickfont: { size: 10 }
+                },
+                width: container.offsetWidth,
+                height: container.offsetHeight,
+                margin: { t: 60, r: 80, b: 80, l: 100 },
+                annotations: annotations,
+                paper_bgcolor: 'rgba(255,255,255,0.1)',
+                plot_bgcolor: 'rgba(255,255,255,0.1)'
+            };
+            
+            container.innerHTML = '';
+            const plotDiv = document.createElement('div');
+            plotDiv.style.width = '100%';
+            plotDiv.style.height = '100%';
+            container.appendChild(plotDiv);
+            Plotly.newPlot(plotDiv, [trace], layout);
+            document.getElementById('result-heatmap').style.display = 'block';
+            
+            window.addEventListener('resize', function() {
+                Plotly.Plots.resize(plotDiv);
+            });
+            
+        } catch (error) {
+            const container = document.getElementById('heatmap-visualization');
+            container.innerHTML = `<div style="text-align:center; padding:15px; color:#ff416c">
+                <div style="font-size: 30px; margin-bottom: 10px;">🔥</div>
+                <h3 style="font-size: 16px;">Heatmap Error</h3>
+                <p style="font-size: 14px;">${error.message}</p>
+            </div>`;
+            document.getElementById('result-heatmap').style.display = 'block';
+        }
+    }
+    
+    // Generate Sankey diagram
+    function generateSankey(agents) {
+        if (agents.length < 2) {
+            document.getElementById('result-sankey').style.display = 'block';
+            return;
         }
         
-        // Initialize with test text
-        window.addEventListener('DOMContentLoaded', () => {
-            document.getElementById('process-text').value = testCases[1];
+        try {
+            const cleanAgents = agents.map(agent => agent.split(' ').slice(0, 3).join(' '));
             
-            // Set initial focus with animation
+            const sources = [];
+            const targets = [];
+            const values = [];
+            
+            for (let i = 0; i < cleanAgents.length - 1; i++) {
+                sources.push(i);
+                targets.push(i + 1);
+                values.push(Math.floor(Math.random() * 30) + 20);
+            }
+            
+            if (cleanAgents.length >= 3) {
+                sources.push(0);
+                targets.push(2);
+                values.push(Math.floor(Math.random() * 25) + 10);
+                
+                sources.push(1);
+                targets.push(cleanAgents.length - 1);
+                values.push(Math.floor(Math.random() * 20) + 5);
+            }
+            
+            if (cleanAgents.length >= 4) {
+                sources.push(2);
+                targets.push(0);
+                values.push(Math.floor(Math.random() * 15) + 5);
+            }
+            
+            const trace = {
+                type: "sankey",
+                orientation: "h",
+                arrangement: "snap",
+                node: {
+                    pad: 30,
+                    thickness: 25,
+                    line: {
+                        color: "black",
+                        width: 2
+                    },
+                    label: cleanAgents,
+                    color: ["#667eea", "#764ba2", "#00b09b", "#96c93d", "#ff416c", "#ff4b2b", "#ffb347", "#ffcc33"].slice(0, cleanAgents.length),
+                    hovertemplate: '%{label}<br>Total flow: %{value}<extra></extra>',
+                    x: cleanAgents.map((_, i) => i * (1 / (cleanAgents.length - 1))),
+                    y: cleanAgents.map((_, i) => 0.1 + (i % 2) * 0.3)
+                },
+                link: {
+                    source: sources,
+                    target: targets,
+                    value: values,
+                    color: ["rgba(102, 126, 234, 0.6)", "rgba(118, 75, 162, 0.6)", "rgba(0, 176, 155, 0.6)", 
+                            "rgba(150, 201, 61, 0.6)", "rgba(255, 65, 108, 0.6)", "rgba(255, 75, 43, 0.6)",
+                            "rgba(255, 179, 71, 0.6)", "rgba(255, 204, 51, 0.6)"],
+                    hovertemplate: 'From: %{source.label}<br>To: %{target.label}<br>Value: %{value}<extra></extra>'
+                }
+            };
+            
+            const container = document.getElementById('sankey-visualization');
+            const layout = {
+                title: {
+                    text: '<span style="font-size:20px; color:#667eea;">Resource Flow Diagram (Sankey)</span>',
+                    font: { size: 20, color: '#2c3e50' }
+                },
+                font: { size: 12, color: '#2c3e50' },
+                width: container.offsetWidth,
+                height: container.offsetHeight,
+                margin: { t: 60, r: 40, b: 40, l: 100 },
+                paper_bgcolor: 'rgba(255,255,255,0.1)',
+                plot_bgcolor: 'rgba(255,255,255,0.1)'
+            };
+            
+            container.innerHTML = '';
+            const plotDiv = document.createElement('div');
+            plotDiv.style.width = '100%';
+            plotDiv.style.height = '100%';
+            container.appendChild(plotDiv);
+            Plotly.newPlot(plotDiv, [trace], layout);
+            document.getElementById('result-sankey').style.display = 'block';
+            
+            window.addEventListener('resize', function() {
+                Plotly.Plots.resize(plotDiv);
+            });
+            
+        } catch (error) {
+            const container = document.getElementById('sankey-visualization');
+            container.innerHTML = `<div style="text-align:center; padding:15px; color:#ff416c">
+                <div style="font-size: 30px; margin-bottom: 10px;">🌊</div>
+                <h3 style="font-size: 16px;">Sankey Diagram Error</h3>
+                <p style="font-size: 14px;">${error.message}</p>
+            </div>`;
+            document.getElementById('result-sankey').style.display = 'block';
+        }
+    }
+    
+    // Initialize with test text
+    window.addEventListener('DOMContentLoaded', () => {
+        document.getElementById('process-text').value = testCases[1];
+        
+        setTimeout(() => {
+            const textarea = document.getElementById('process-text');
+            textarea.focus();
+            textarea.style.transform = 'scale(1.02)';
             setTimeout(() => {
-                const textarea = document.getElementById('process-text');
-                textarea.focus();
-                textarea.style.transform = 'scale(1.02)';
-                setTimeout(() => {
-                    textarea.style.transform = 'scale(1)';
-                }, 300);
-            }, 500);
-        });
-    </script>
+                textarea.style.transform = 'scale(1)';
+            }, 300);
+        }, 500);
+    });
+</script>
+
 </body>
 </html>
+
 
 
 
