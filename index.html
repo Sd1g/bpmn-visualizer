@@ -1256,36 +1256,141 @@ Example: Employee submits a vacation request. Manager reviews the request. If ap
         
         // Generate demo results
         // Generate demo results
-        function generateDemoResults(text) {
-            try {
-                // 1. Извлекаем токены-сущности
-                const entities = extractEntities(text);
-        
-                // 2. Группируем их в осмысленные фразы по типам
-                const grouped = groupEntities(entities);
-        
-                // 3. Подсветка в тексте — как и было
-                showEntityHighlighting(entities);
-        
-                // 4. PlantUML теперь строится по сгруппированным сущностям
-                const plantumlText = generatePlantUMLFromEntities(grouped, text);
-                showPlantUML(plantumlText);
-        
-                // 5. Участники для матриц/диаграмм — сначала берём AGENT из сущностей,
-                //    если вдруг их нет — откатываемся к старому extractAgents
-                let agents = grouped.AGENT && grouped.AGENT.length > 0
-                    ? grouped.AGENT
-                    : extractAgents(text);
-        
-                showInteractionMatrix(agents);
-                generateHeatmap(agents);
-                generateSankey(agents);
-        
-            } catch (error) {
-                showError(`❌ Failed to generate results: ${error.message}`);
-                console.error('Generation error:', error);
-            }
+        // Экранируем текст для PlantUML (минимально)
+function escapePlantUMLLabel(label) {
+    return label.replace(/"/g, '\\"');
+}
+
+// Генерация PlantUML-диаграммы по сгруппированным сущностям + условные ветки
+function generatePlantUMLFromEntities(grouped, originalText) {
+    const agentsRaw = grouped.AGENT || [];
+    const tasksRaw = grouped.TASK || [];
+    const hasConditionKeyword =
+        (grouped.CONDITION && grouped.CONDITION.length > 0) ||
+        originalText.toLowerCase().includes('if') ||
+        originalText.toLowerCase().includes('otherwise');
+
+    // Участники — уникальные AGENT‑фразы, максимум 6
+    let uniqueAgents = [...new Set(
+        agentsRaw.map(a => a.trim()).filter(a => a.length > 0)
+    )].slice(0, 6);
+
+    // Если агентов не нашли — демо‑набор
+    if (uniqueAgents.length === 0) {
+        uniqueAgents = ['Employee', 'Manager', 'HR Department', 'Finance', 'Support', 'System'];
+    }
+
+    // Обрезаем длинные подписи
+    const cleanAgents = uniqueAgents.map(a =>
+        a.length > 30 ? a.substring(0, 30) + '...' : a
+    );
+
+    // Задачи — последовательность TASK‑фраз
+    const tasks = tasksRaw.map(t => t.trim()).filter(t => t.length > 0);
+
+    // Пытаемся вытащить структурированное ветвление
+    const condStruct = hasConditionKeyword
+        ? extractConditionalStructure(originalText, cleanAgents)
+        : null;
+
+    let plantuml = `@startuml\n`;
+    plantuml += `!theme plain\n`;
+    plantuml += `skinparam backgroundColor #FFFFFF\n`;
+    plantuml += `skinparam sequence {\n`;
+    plantuml += `  ArrowColor #667eea\n`;
+    plantuml += `  ActorBorderColor #000000\n`;
+    plantuml += `  ActorBackgroundColor #E1F5FE\n`;
+    plantuml += `  ParticipantBorderColor #667eea\n`;
+    plantuml += `  ParticipantBackgroundColor #F8F9FF\n`;
+    plantuml += `  LifeLineBorderColor #667eea\n`;
+    plantuml += `  LifeLineBackgroundColor #FFFFFF\n`;
+    plantuml += `  ParticipantFontSize 16\n`;
+    plantuml += `  ActorFontSize 16\n`;
+    plantuml += `}\n\n`;
+
+    plantuml += `title **<color:#667eea>UML Sequence Diagram</color>**\n`;
+    plantuml += `caption Generated from: "${escapePlantUMLLabel(originalText.substring(0, 100))}${originalText.length > 100 ? '...' : ''}"\n\n`;
+
+    // Объявляем участников
+    cleanAgents.forEach((agent, idx) => {
+        plantuml += `participant "<color:#667eea><b>${escapePlantUMLLabel(agent)}</b></color>" as P${idx}\n`;
+    });
+    plantuml += `\n`;
+
+    const nAgents = cleanAgents.length;
+
+    // Линейный поток задач (как раньше, но немного упорядоченный)
+    if (nAgents >= 2 && tasks.length > 0) {
+        tasks.forEach((taskText, i) => {
+            const from = i % nAgents;
+            const to = (i + 1) % nAgents;
+            const label = escapePlantUMLLabel(taskText.length > 80 ? taskText.substring(0, 80) + '...' : taskText);
+
+            plantuml += `P${from} -> P${to} : **<color:#00b09b>${label}</color>**\n`;
+            plantuml += `activate P${to}\n`;
+        });
+    } else if (nAgents >= 2) {
+        plantuml += `P0 -> P1 : **<color:#00b09b>Process</color>**\n`;
+        plantuml += `activate P1\n`;
+    }
+
+    // Ветвление (alt) — сначала пробуем использовать разобранную структуру
+    if (condStruct) {
+        plantuml += `\n`;
+        const condLabelEsc = escapePlantUMLLabel(condStruct.conditionLabel);
+
+        plantuml += `alt **<color:#667eea>${condLabelEsc}</color>**\n`;
+
+        // THEN‑ветка
+        const thenShort = condStruct.thenSentence.length > 80
+            ? condStruct.thenSentence.substring(0, 80) + '...'
+            : condStruct.thenSentence;
+        const thenLabel = escapePlantUMLLabel(thenShort);
+
+        plantuml += `  P${condStruct.thenFrom} -> P${condStruct.thenTo} : **<color:#96c93d>${thenLabel}</color>**\n`;
+
+        // ELSE‑ветка, если есть отдельное предложение
+        if (condStruct.elseSentence) {
+            let elseText = condStruct.elseSentence
+                .replace(/^otherwise[,:\s]*/i, '')
+                .replace(/^else[,:\s]*/i, '')
+                .trim();
+            if (!elseText) elseText = condStruct.elseSentence;
+
+            const elseShort = elseText.length > 80 ? elseText.substring(0, 80) + '...' : elseText;
+            const elseLabel = escapePlantUMLLabel(elseShort);
+
+            plantuml += `else **<color:#ff416c>otherwise</color>**\n`;
+            plantuml += `  P${condStruct.elseFrom} -> P${condStruct.elseTo} : **<color:#ff416c>${elseLabel}</color>**\n`;
+        } else {
+            // Если отдельной "otherwise" нет — рисуем абстрактную альтернативу
+            plantuml += `else **<color:#ff416c>otherwise</color>**\n`;
+            plantuml += `  P0 -> P0 : **<color:#ff416c>Alternative path</color>**\n`;
         }
+
+        plantuml += `end\n`;
+    } else if (hasConditionKeyword) {
+        // Фолбэк: условие есть, но структуру разобрать не смогли — старый универсальный alt
+        plantuml += `\n`;
+        plantuml += `alt **<color:#667eea>Condition / approved</color>**\n`;
+        if (nAgents >= 2) {
+            plantuml += `  P1 -> P0 : **<color:#96c93d>Positive path</color>**\n`;
+        } else {
+            plantuml += `  P0 -> P0 : **<color:#96c93d>Positive path</color>**\n`;
+        }
+        plantuml += `else **<color:#ff416c>Condition / rejected</color>**\n`;
+        if (nAgents >= 2) {
+            plantuml += `  P1 -> P0 : **<color:#ff416c>Negative path</color>**\n`;
+        } else {
+            plantuml += `  P0 -> P0 : **<color:#ff416c>Negative path</color>**\n`;
+        }
+        plantuml += `end\n`;
+    }
+
+    plantuml += `\n@enduml`;
+
+    return plantuml;
+}
 
         
         // Extract entities from text
@@ -1354,7 +1459,92 @@ Example: Employee submits a vacation request. Manager reviews the request. If ap
         
             return groups;
         }
- 
+ // Разбиваем текст на предложения
+function splitIntoSentences(text) {
+    return text
+        .split(/(?<=[.!?])\s+/)
+        .map(s => s.trim())
+        .filter(Boolean);
+}
+
+// Пытаемся вытащить из текста одну условную конструкцию: If ... Then ... Otherwise ...
+// agents — массив имён участников (cleanAgents из PlantUML)
+function extractConditionalStructure(text, agents) {
+    const sentences = splitIntoSentences(text);
+    const agentsLower = agents.map(a => a.toLowerCase());
+
+    // Ищем первое предложение с "if"
+    let ifIdx = -1;
+    for (let i = 0; i < sentences.length; i++) {
+        if (sentences[i].toLowerCase().includes('if ')) {
+            ifIdx = i;
+            break;
+        }
+    }
+    if (ifIdx === -1) return null;
+
+    // Ищем предложение с "otherwise" / "else" после if
+    let elseIdx = -1;
+    for (let j = ifIdx + 1; j < sentences.length; j++) {
+        const lc = sentences[j].toLowerCase();
+        if (lc.startsWith('otherwise') || lc.startsWith('else')) {
+            elseIdx = j;
+            break;
+        }
+    }
+
+    const ifSentence = sentences[ifIdx];
+
+    // then‑ветка: либо следующее предложение, либо само if‑предложение
+    let thenSentence = ifSentence;
+    if (ifIdx + 1 < sentences.length && ifIdx + 1 !== elseIdx) {
+        thenSentence = sentences[ifIdx + 1];
+    }
+
+    const elseSentence = elseIdx !== -1 ? sentences[elseIdx] : null;
+
+    // Поиск упомянутых агентов в предложении
+    function findAgentsInSentence(sentence) {
+        const s = sentence.toLowerCase();
+        const indices = [];
+        agentsLower.forEach((a, idx) => {
+            if (a && s.includes(a)) indices.push(idx);
+        });
+        return indices;
+    }
+
+    function choosePair(sentence) {
+        const idxs = findAgentsInSentence(sentence);
+        if (idxs.length >= 2) {
+            return { from: idxs[0], to: idxs[1] };
+        }
+        if (idxs.length === 1) {
+            const only = idxs[0];
+            // если нашли одного — пусть он будет получателем, а отправитель — первый агент в диаграмме
+            return { from: 0, to: only };
+        }
+        // если никого не нашли — просто P0 -> P1 (если есть)
+        return { from: 0, to: Math.min(1, agents.length - 1) };
+    }
+
+    // Вытащим текст условия из "if ..."
+    const condMatch = ifSentence.match(/if\s+([^,.!?]+)/i);
+    const conditionLabel = condMatch ? condMatch[1].trim() : 'Condition';
+
+    const thenPair = choosePair(thenSentence);
+    const elsePair = elseSentence ? choosePair(elseSentence) : choosePair(ifSentence);
+
+    return {
+        conditionLabel,
+        thenSentence,
+        elseSentence,
+        thenFrom: thenPair.from,
+        thenTo: thenPair.to,
+        elseFrom: elsePair.from,
+        elseTo: elsePair.to
+    };
+}
+
         // Extract participants from text
         function extractAgents(text) {
             const agents = [];
@@ -1940,6 +2130,7 @@ function generatePlantUMLFromEntities(grouped, originalText) {
     </script>
 </body>
 </html>
+
 
 
 
