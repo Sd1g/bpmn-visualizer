@@ -1004,8 +1004,8 @@ Example: Employee submits a vacation request. Manager reviews the request. If ap
         <div class="fullscreen-content" id="fullscreen-content"></div>
     </div>
 
-   <script>
-    // Test data in English
+  <script>
+    // Тестовые данные
     const testCases = {
         1: `Employee submits a vacation request. Manager reviews the request. If approved, HR department processes the vacation. Otherwise, manager informs the employee.`,
         
@@ -1014,13 +1014,12 @@ Example: Employee submits a vacation request. Manager reviews the request. If ap
         3: `Customer sends development request. Project manager analyzes the request. If request matches company capabilities, sales department prepares commercial proposal, technical department estimates timelines. If proposal accepted, development department starts work, testers verify result. Otherwise, project manager informs customer about refusal.`
     };
 
-    // Initialize test buttons
+    // Инициализация кнопок тестов
     document.querySelectorAll('.test-btn').forEach(button => {
         button.addEventListener('click', function() {
             const testNumber = this.getAttribute('data-test');
             document.getElementById('process-text').value = testCases[testNumber];
             showStatus(`Loaded test case ${testNumber}`, 'success');
-            // Animate button
             this.style.transform = 'scale(0.95)';
             setTimeout(() => {
                 this.style.transform = '';
@@ -1028,18 +1027,17 @@ Example: Employee submits a vacation request. Manager reviews the request. If ap
         });
     });
 
-    // Process button
+    // Кнопки
     document.getElementById('process-btn').addEventListener('click', processText);
-    
-    // Reset button
     document.getElementById('reset-btn').addEventListener('click', resetApp);
-    
-    // Close error button
     document.getElementById('close-error').addEventListener('click', () => {
         document.getElementById('error-section').style.display = 'none';
     });
-    
-    // Fullscreen functions
+
+    // -----------------------------
+    // UI / общий флоу обработки
+    // -----------------------------
+
     function toggleFullscreen(elementId) {
         const element = document.getElementById(elementId);
         const overlay = document.getElementById('fullscreen-overlay');
@@ -1047,7 +1045,6 @@ Example: Employee submits a vacation request. Manager reviews the request. If ap
         
         content.innerHTML = element.innerHTML;
         
-        // Adjust for fullscreen
         const images = content.querySelectorAll('img');
         images.forEach(img => {
             img.style.maxWidth = '100%';
@@ -1058,7 +1055,6 @@ Example: Employee submits a vacation request. Manager reviews the request. If ap
         overlay.style.display = 'flex';
         document.body.style.overflow = 'hidden';
         
-        // Also show Plotly figures in fullscreen
         if (elementId === 'heatmap-visualization' || elementId === 'sankey-visualization') {
             setTimeout(() => {
                 Plotly.Plots.resize(content);
@@ -1072,7 +1068,6 @@ Example: Employee submits a vacation request. Manager reviews the request. If ap
         document.body.style.overflow = 'auto';
     }
     
-    // Download functions
     function downloadPlantUML() {
         const url = document.getElementById('plantuml-url').href;
         if (url && url !== '#') {
@@ -1104,7 +1099,6 @@ Example: Employee submits a vacation request. Manager reviews the request. If ap
         }
     }
     
-    // Refresh PlantUML
     function refreshPlantUML() {
         const plantumlText = document.getElementById('plantuml-text').textContent;
         if (plantumlText) {
@@ -1113,7 +1107,6 @@ Example: Employee submits a vacation request. Manager reviews the request. If ap
         }
     }
     
-    // Function to process text
     async function processText() {
         const text = document.getElementById('process-text').value.trim();
         
@@ -1122,28 +1115,20 @@ Example: Employee submits a vacation request. Manager reviews the request. If ap
             return;
         }
         
-        // Reset previous state
         hideAllResults();
         hideError();
         hideStatus();
         
-        // Show progress bar
         const progressSection = document.getElementById('progress-section');
         const progressBar = document.getElementById('progress-bar');
         const progressText = document.getElementById('progress-text');
         progressSection.style.display = 'block';
         
         try {
-            // Simulate processing with progress updates
             await simulateProcessing(progressBar, progressText);
-            
-            // Generate results
             generateDemoResults(text);
-            
-            // Show success
             showStatus('✅ Processing completed successfully! Visualizations are ready.', 'success');
             
-            // Scroll to results
             setTimeout(() => {
                 document.querySelector('.results-section').scrollIntoView({ 
                     behavior: 'smooth',
@@ -1154,7 +1139,6 @@ Example: Employee submits a vacation request. Manager reviews the request. If ap
         } catch (error) {
             showError(`❌ Processing error: ${error.message}`);
         } finally {
-            // Hide progress bar after delay
             setTimeout(() => {
                 progressSection.style.display = 'none';
                 progressBar.style.width = '0%';
@@ -1162,7 +1146,6 @@ Example: Employee submits a vacation request. Manager reviews the request. If ap
         }
     }
     
-    // Simulate processing with progress
     async function simulateProcessing(progressBar, progressText) {
         const steps = [
             {percent: 10, text: "📖 Parsing text structure..."},
@@ -1182,31 +1165,26 @@ Example: Employee submits a vacation request. Manager reviews the request. If ap
         }
     }
     
-    // Show error
     function showError(message) {
         const errorSection = document.getElementById('error-section');
         const errorMessage = document.getElementById('error-message');
         errorMessage.textContent = message;
         errorSection.style.display = 'block';
         
-        // Scroll to error
         errorSection.scrollIntoView({ 
             behavior: 'smooth',
             block: 'center'
         });
         
-        // Auto-hide error after 15 seconds
         setTimeout(() => {
             errorSection.style.display = 'none';
         }, 15000);
     }
     
-    // Hide error
     function hideError() {
         document.getElementById('error-section').style.display = 'none';
     }
     
-    // Reset function
     function resetApp() {
         document.getElementById('process-text').value = '';
         hideAllResults();
@@ -1215,12 +1193,9 @@ Example: Employee submits a vacation request. Manager reviews the request. If ap
         document.getElementById('progress-section').style.display = 'none';
         showStatus('🔄 Application reset. Ready for new input.', 'success');
         setTimeout(hideStatus, 2000);
-        
-        // Scroll to top
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
     
-    // Hide all results
     function hideAllResults() {
         const resultCards = document.querySelectorAll('.result-card');
         resultCards.forEach(card => {
@@ -1228,7 +1203,6 @@ Example: Employee submits a vacation request. Manager reviews the request. If ap
         });
     }
     
-    // Show status
     function showStatus(message, type) {
         const statusEl = document.getElementById('status-message');
         statusEl.innerHTML = message;
@@ -1239,7 +1213,6 @@ Example: Employee submits a vacation request. Manager reviews the request. If ap
             statusEl.innerHTML = `<span class="loading-spinner"></span> ${message}`;
         }
         
-        // Auto-hide success messages
         if (type === 'success') {
             setTimeout(() => {
                 if (statusEl.className.includes('status-success')) {
@@ -1249,16 +1222,14 @@ Example: Employee submits a vacation request. Manager reviews the request. If ap
         }
     }
     
-    // Hide status
     function hideStatus() {
         document.getElementById('status-message').style.display = 'none';
     }
 
-    // --------------------------
-    // NLP / сущности / ветвление
-    // --------------------------
+    // -----------------------------
+    // NLP / сущности / роли / if-ветвление
+    // -----------------------------
 
-    // Extract entities from text
     function extractEntities(text) {
         const entities = [];
         const words = text.split(/\s+/);
@@ -1266,9 +1237,14 @@ Example: Employee submits a vacation request. Manager reviews the request. If ap
         words.forEach(word => {
             const cleanWord = word.replace(/[.,]/g, '').toLowerCase();
             
-            if (['department', 'service', 'employee', 'customer', 'manager', 'client', 'tester', 'project', 'team', 'system'].some(term => cleanWord.includes(term))) {
+            if (['department', 'service', 'employee', 'customer', 'manager', 'client', 'tester', 'project', 'team', 'system']
+                .some(term => cleanWord.includes(term))) {
                 entities.push({text: word, type: 'AGENT'});
-            } else if (['submits', 'reviews', 'checks', 'analyzes', 'prepares', 'estimates', 'starts', 'processes', 'informs', 'verifies', 'sends', 'approves', 'accepts'].some(term => cleanWord.includes(term))) {
+            } else if ([
+                'submits','reviews','checks','analyzes','prepares',
+                'estimates','starts','processes','informs','verifies',
+                'sends','approves','accepts'
+            ].some(term => cleanWord.includes(term))) {
                 entities.push({text: word, type: 'TASK'});
             } else if (['if', 'otherwise', 'when', 'then'].includes(cleanWord)) {
                 entities.push({text: word, type: 'CONDITION'});
@@ -1280,7 +1256,6 @@ Example: Employee submits a vacation request. Manager reviews the request. If ap
         return entities;
     }
 
-    // Группируем сущности по типам и склеиваем соседние слова одного типа в фразы
     function groupEntities(entities) {
         const groups = {
             AGENT: [],
@@ -1322,7 +1297,39 @@ Example: Employee submits a vacation request. Manager reviews the request. If ap
         return groups;
     }
 
-    // Разбиваем текст на предложения
+    // Нормализация и объединение ролей (агентов)
+    function normalizeAgentName(name) {
+        return name
+            .toLowerCase()
+            .replace(/[.,]/g, ' ')
+            .replace(/\s+/g, ' ')
+            .trim();
+    }
+
+    function unifyAgents(agentPhrases) {
+        const map = new Map(); // normName -> displayName
+
+        (agentPhrases || []).forEach(raw => {
+            if (!raw) return;
+            const trimmed = String(raw).trim();
+            if (!trimmed) return;
+
+            const norm = normalizeAgentName(trimmed);
+            if (!norm) return;
+
+            if (!map.has(norm)) {
+                const pretty = trimmed
+                    .replace(/\s+/g, ' ')
+                    .split(' ')
+                    .map(w => w.charAt(0).toUpperCase() + w.slice(1))
+                    .join(' ');
+                map.set(norm, pretty);
+            }
+        });
+
+        return Array.from(map.values());
+    }
+
     function splitIntoSentences(text) {
         return text
             .split(/(?<=[.!?])\s+/)
@@ -1330,12 +1337,10 @@ Example: Employee submits a vacation request. Manager reviews the request. If ap
             .filter(Boolean);
     }
 
-    // Пытаемся вытащить из текста одну условную конструкцию: If ... Then ... Otherwise ...
     function extractConditionalStructure(text, agents) {
         const sentences = splitIntoSentences(text);
         const agentsLower = agents.map(a => a.toLowerCase());
 
-        // Ищем первое предложение с "if"
         let ifIdx = -1;
         for (let i = 0; i < sentences.length; i++) {
             if (sentences[i].toLowerCase().includes('if ')) {
@@ -1345,7 +1350,6 @@ Example: Employee submits a vacation request. Manager reviews the request. If ap
         }
         if (ifIdx === -1) return null;
 
-        // Ищем предложение с "otherwise" / "else" после if
         let elseIdx = -1;
         for (let j = ifIdx + 1; j < sentences.length; j++) {
             const lc = sentences[j].toLowerCase();
@@ -1357,7 +1361,6 @@ Example: Employee submits a vacation request. Manager reviews the request. If ap
 
         const ifSentence = sentences[ifIdx];
 
-        // then‑ветка: либо следующее предложение, либо само if‑предложение
         let thenSentence = ifSentence;
         if (ifIdx + 1 < sentences.length && ifIdx + 1 !== elseIdx) {
             thenSentence = sentences[ifIdx + 1];
@@ -1365,7 +1368,6 @@ Example: Employee submits a vacation request. Manager reviews the request. If ap
 
         const elseSentence = elseIdx !== -1 ? sentences[elseIdx] : null;
 
-        // Поиск упомянутых агентов в предложении
         function findAgentsInSentence(sentence) {
             const s = sentence.toLowerCase();
             const indices = [];
@@ -1404,12 +1406,41 @@ Example: Employee submits a vacation request. Manager reviews the request. If ap
         };
     }
 
-    // Экранируем текст для PlantUML (минимально)
+    // -----------------------------
+    // PlantUML
+    // -----------------------------
+
     function escapePlantUMLLabel(label) {
         return label.replace(/"/g, '\\"');
     }
 
-    // Генерация PlantUML-диаграммы по сгруппированным сущностям + условные ветки
+    // Фолбэк-извлечение агентов, если из сущностей не получилось
+    function extractAgents(text) {
+        const agents = [];
+        const sentences = text.split(/[.,]/g);
+        
+        sentences.forEach(sentence => {
+            if (sentence.includes('department') || sentence.includes('service') || sentence.includes('employee') || 
+                sentence.includes('customer') || sentence.includes('manager') || sentence.includes('client') ||
+                sentence.includes('project') || sentence.includes('team') || sentence.includes('system')) {
+                
+                const words = sentence.trim().split(/\s+/);
+                if (words.length > 0) {
+                    const agent = words.slice(0, Math.min(4, words.length)).join(' ');
+                    if (agent && !agents.includes(agent)) {
+                        agents.push(agent);
+                    }
+                }
+            }
+        });
+        
+        if (agents.length === 0) {
+            return ['Employee', 'Manager', 'HR Department', 'Finance Department', 'Support Service'];
+        }
+        
+        return agents;
+    }
+
     function generatePlantUMLFromEntities(grouped, originalText) {
         const agentsRaw = grouped.AGENT || [];
         const tasksRaw = grouped.TASK || [];
@@ -1418,17 +1449,12 @@ Example: Employee submits a vacation request. Manager reviews the request. If ap
             originalText.toLowerCase().includes('if') ||
             originalText.toLowerCase().includes('otherwise');
 
-        let uniqueAgents = [...new Set(
-            agentsRaw.map(a => a.trim()).filter(a => a.length > 0)
-        )].slice(0, 6);
+        // Объединяем одинаковые роли
+        let cleanAgents = unifyAgents(agentsRaw).slice(0, 6);
 
-        if (uniqueAgents.length === 0) {
-            uniqueAgents = ['Employee', 'Manager', 'HR Department', 'Finance', 'Support', 'System'];
+        if (cleanAgents.length === 0) {
+            cleanAgents = ['Employee', 'Manager', 'Hr Department', 'Finance', 'Support', 'System'];
         }
-
-        const cleanAgents = uniqueAgents.map(a =>
-            a.length > 30 ? a.substring(0, 30) + '...' : a
-        );
 
         const tasks = tasksRaw.map(t => t.trim()).filter(t => t.length > 0);
 
@@ -1455,7 +1481,8 @@ Example: Employee submits a vacation request. Manager reviews the request. If ap
         plantuml += `caption Generated from: "${escapePlantUMLLabel(originalText.substring(0, 100))}${originalText.length > 100 ? '...' : ''}"\n\n`;
 
         cleanAgents.forEach((agent, idx) => {
-            plantuml += `participant "<color:#667eea><b>${escapePlantUMLLabel(agent)}</b></color>" as P${idx}\n`;
+            const display = agent.length > 30 ? agent.substring(0, 30) + '...' : agent;
+            plantuml += `participant "<color:#667eea><b>${escapePlantUMLLabel(display)}</b></color>" as P${idx}\n`;
         });
         plantuml += `\n`;
 
@@ -1465,7 +1492,8 @@ Example: Employee submits a vacation request. Manager reviews the request. If ap
             tasks.forEach((taskText, i) => {
                 const from = i % nAgents;
                 const to = (i + 1) % nAgents;
-                const label = escapePlantUMLLabel(taskText.length > 80 ? taskText.substring(0, 80) + '...' : taskText);
+                const short = taskText.length > 80 ? taskText.substring(0, 80) + '...' : taskText;
+                const label = escapePlantUMLLabel(short);
 
                 plantuml += `P${from} -> P${to} : **<color:#00b09b>${label}</color>**\n`;
                 plantuml += `activate P${to}\n`;
@@ -1528,93 +1556,6 @@ Example: Employee submits a vacation request. Manager reviews the request. If ap
         return plantuml;
     }
 
-    // Extract participants from text (fallback)
-    function extractAgents(text) {
-        const agents = [];
-        const sentences = text.split(/[.,]/g);
-        
-        sentences.forEach(sentence => {
-            if (sentence.includes('department') || sentence.includes('service') || sentence.includes('employee') || 
-                sentence.includes('customer') || sentence.includes('manager') || sentence.includes('client') ||
-                sentence.includes('project') || sentence.includes('team') || sentence.includes('system')) {
-                
-                const words = sentence.trim().split(/\s+/);
-                if (words.length > 0) {
-                    const agent = words.slice(0, Math.min(4, words.length)).join(' ');
-                    if (agent && !agents.includes(agent)) {
-                        agents.push(agent);
-                    }
-                }
-            }
-        });
-        
-        if (agents.length === 0) {
-            return ['Employee', 'Manager', 'HR Department', 'Finance Department', 'Support Service'];
-        }
-        
-        return agents;
-    }
-
-    // Show entity highlighting
-    function showEntityHighlighting(entities) {
-        const container = document.getElementById('highlighted-text');
-        let html = '';
-        
-        let currentGroup = [];
-        let currentType = null;
-        
-        entities.forEach((entity, index) => {
-            if (entity.type !== currentType && currentGroup.length > 0) {
-                html += createEntitySpan(currentGroup.join(' '), currentType);
-                currentGroup = [];
-            }
-            
-            currentGroup.push(entity.text);
-            currentType = entity.type;
-            
-            if (index === entities.length - 1) {
-                html += createEntitySpan(currentGroup.join(' '), currentType);
-            }
-        });
-        
-        container.innerHTML = html;
-        document.getElementById('result-highlighting').style.display = 'block';
-    }
-    
-    // Create entity span
-    function createEntitySpan(text, type) {
-        const typeClass = `entity-${type.toLowerCase()}`;
-        const displayType = type !== 'O' ? type : '';
-        const icon = type === 'AGENT' ? '👤' : type === 'TASK' ? '⚙️' : type === 'CONDITION' ? '🔀' : '';
-        
-        return `
-            <span class="entity ${typeClass}">
-                ${icon} ${text}
-                ${displayType ? `<span class="entity-label">${displayType}</span>` : ''}
-            </span>
-        `;
-    }
-
-    // Основная функция генерации результатов
-    function generateDemoResults(text) {
-        const entities = extractEntities(text);
-        const grouped = groupEntities(entities);
-
-        showEntityHighlighting(entities);
-
-        const plantumlText = generatePlantUMLFromEntities(grouped, text);
-        showPlantUML(plantumlText);
-
-        let agents = grouped.AGENT && grouped.AGENT.length > 0
-            ? grouped.AGENT
-            : extractAgents(text);
-
-        showInteractionMatrix(agents);
-        generateHeatmap(agents);
-        generateSankey(agents);
-    }
-
-    // Show PlantUML
     function showPlantUML(plantumlText) {
         document.getElementById('plantuml-text').textContent = plantumlText;
         
@@ -1644,7 +1585,6 @@ Example: Employee submits a vacation request. Manager reviews the request. If ap
         }
     }
 
-    // Обработчик ошибки загрузки PlantUML
     function handlePlantUMLError(img, url) {
         console.error('Error loading PlantUML image:', url);
         if (img && img.parentElement) {
@@ -1655,7 +1595,6 @@ Example: Employee submits a vacation request. Manager reviews the request. If ap
         }
     }
 
-    // CORRECT PlantUML encoding function
     function encodePlantUML(text) {
         const utf8 = new TextEncoder().encode(text);
         const compressed = pako.deflateRaw(utf8, { level: 9 });
@@ -1688,11 +1627,81 @@ Example: Employee submits a vacation request. Manager reviews the request. If ap
         return result;
     }
 
-    // Show interaction matrix
-    function showInteractionMatrix(agents) {
-        if (agents.length === 0) return;
+    // -----------------------------
+    // Подсветка сущностей
+    // -----------------------------
+
+    function showEntityHighlighting(entities) {
+        const container = document.getElementById('highlighted-text');
+        let html = '';
         
-        const cleanAgents = agents.map(agent => agent.split(' ').slice(0, 3).join(' '));
+        let currentGroup = [];
+        let currentType = null;
+        
+        entities.forEach((entity, index) => {
+            if (entity.type !== currentType && currentGroup.length > 0) {
+                html += createEntitySpan(currentGroup.join(' '), currentType);
+                currentGroup = [];
+            }
+            
+            currentGroup.push(entity.text);
+            currentType = entity.type;
+            
+            if (index === entities.length - 1) {
+                html += createEntitySpan(currentGroup.join(' '), currentType);
+            }
+        });
+        
+        container.innerHTML = html;
+        document.getElementById('result-highlighting').style.display = 'block';
+    }
+    
+    function createEntitySpan(text, type) {
+        const typeClass = `entity-${type.toLowerCase()}`;
+        const displayType = type !== 'O' ? type : '';
+        const icon = type === 'AGENT' ? '👤' : type === 'TASK' ? '⚙️' : type === 'CONDITION' ? '🔀' : '';
+        
+        return `
+            <span class="entity ${typeClass}">
+                ${icon} ${text}
+                ${displayType ? `<span class="entity-label">${displayType}</span>` : ''}
+            </span>
+        `;
+    }
+
+    // -----------------------------
+    // Генерация всех результатов
+    // -----------------------------
+
+    function generateDemoResults(text) {
+        const entities = extractEntities(text);
+        const grouped = groupEntities(entities);
+
+        showEntityHighlighting(entities);
+
+        const plantumlText = generatePlantUMLFromEntities(grouped, text);
+        showPlantUML(plantumlText);
+
+        const agentsRaw = (grouped.AGENT && grouped.AGENT.length > 0)
+            ? grouped.AGENT
+            : extractAgents(text);
+
+        const agents = unifyAgents(agentsRaw);
+
+        showInteractionMatrix(agents);
+        generateHeatmap(agents);
+        generateSankey(agents);
+    }
+
+    // -----------------------------
+    // Матрица, Heatmap, Sankey
+    // -----------------------------
+
+    function showInteractionMatrix(agents) {
+        if (!agents || agents.length === 0) return;
+        
+        let cleanAgents = unifyAgents(agents).map(a => a.split(' ').slice(0, 3).join(' '));
+        if (cleanAgents.length === 0) return;
         
         let matrixText = 'PARTICIPANTS: ' + cleanAgents.map((agent, i) => `P${i}=${agent}`).join(', ') + '\n\n';
         matrixText += 'INTERACTION MATRIX (0-10 interactions):\n\n';
@@ -1716,15 +1725,18 @@ Example: Employee submits a vacation request. Manager reviews the request. If ap
         document.getElementById('matrix-text').textContent = matrixText;
     }
     
-    // Generate heatmap
     function generateHeatmap(agents) {
-        if (agents.length === 0) {
+        if (!agents || agents.length === 0) {
             document.getElementById('result-heatmap').style.display = 'block';
             return;
         }
         
         try {
-            const cleanAgents = agents.map(agent => agent.split(' ').slice(0, 3).join(' '));
+            let cleanAgents = unifyAgents(agents).map(a => a.split(' ').slice(0, 3).join(' '));
+            if (cleanAgents.length === 0) {
+                document.getElementById('result-heatmap').style.display = 'block';
+                return;
+            }
             
             const data = [];
             const annotations = [];
@@ -1823,15 +1835,18 @@ Example: Employee submits a vacation request. Manager reviews the request. If ap
         }
     }
     
-    // Generate Sankey diagram
     function generateSankey(agents) {
-        if (agents.length < 2) {
+        if (!agents || agents.length < 2) {
             document.getElementById('result-sankey').style.display = 'block';
             return;
         }
         
         try {
-            const cleanAgents = agents.map(agent => agent.split(' ').slice(0, 3).join(' '));
+            let cleanAgents = unifyAgents(agents).map(a => a.split(' ').slice(0, 3).join(' '));
+            if (cleanAgents.length < 2) {
+                document.getElementById('result-sankey').style.display = 'block';
+                return;
+            }
             
             const sources = [];
             const targets = [];
@@ -1924,7 +1939,10 @@ Example: Employee submits a vacation request. Manager reviews the request. If ap
         }
     }
     
-    // Initialize with test text
+    // -----------------------------
+    // Инициализация
+    // -----------------------------
+
     window.addEventListener('DOMContentLoaded', () => {
         document.getElementById('process-text').value = testCases[1];
         
@@ -1939,8 +1957,10 @@ Example: Employee submits a vacation request. Manager reviews the request. If ap
     });
 </script>
 
+
 </body>
 </html>
+
 
 
 
